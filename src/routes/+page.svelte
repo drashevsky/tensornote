@@ -6,7 +6,9 @@
     let adapter : LocalEmbeddingAdapter;
 
     onMount(async () => {
+        console.log("Initializing embeddings model...");
         adapter = await LocalEmbeddingAdapter.create("Xenova/jina-embeddings-v2-small-en-8192");
+        console.log(adapter.config.model_name + " ready.");
     });
 </script>
 
