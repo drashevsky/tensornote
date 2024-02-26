@@ -1,0 +1,1 @@
+<div class="w-full h-[75%] bg-blue-600"></div>

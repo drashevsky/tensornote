@@ -1,6 +1,8 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import { LocalEmbeddingAdapter } from "$lib/embeddings/LocalEmbeddingAdapter";
+    import NavBar from "./NavBar.svelte";
+    import Notes from "./Notes.svelte";
     import InputBar from './InputBar.svelte';
 
     let adapter : LocalEmbeddingAdapter;
@@ -12,6 +14,6 @@
     });
 </script>
 
-<h1>Embeddings Test</h1>
-
+<NavBar />
+<Notes />
 <InputBar {adapter}/>

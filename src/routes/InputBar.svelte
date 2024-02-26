@@ -28,20 +28,6 @@
     $: text && updateEmbedding();
 </script>
 
-<div>
-    <textarea placeholder="Type or search for a note." 
-        bind:value={text}/>
-    <div class="embedding-display">{embedding}</div>
+<div class="fixed bottom-0 w-full h-[20%]">
+    <textarea class="w-full h-full" placeholder="Type or search for a note." bind:value={text}/>
 </div>
-
-<style>
-    textarea {
-        width: 90%;
-        min-height: 100px;
-    }
-
-    .embedding-display {
-        width: 90%;
-        word-wrap: break-word;
-    }
-</style>
