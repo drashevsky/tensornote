@@ -6,14 +6,19 @@
     import InputBar from './InputBar.svelte';
 
     let adapter : LocalEmbeddingAdapter;
+    let embedding : number[] = [];
 
     onMount(async () => {
         console.log("Initializing embeddings model...");
         adapter = await LocalEmbeddingAdapter.create("Xenova/jina-embeddings-v2-small-en-8192");
         console.log(adapter.config.model_name + " ready.");
     });
+
+    async function updateEmbedding(event : CustomEvent) {
+        embedding = (await adapter.embed(event.detail.text)).vec;
+    }
 </script>
 
 <NavBar />
-<Notes />
-<InputBar {adapter}/>
+<Notes {embedding}/>
+<InputBar on:inputbarupdate={updateEmbedding}/>

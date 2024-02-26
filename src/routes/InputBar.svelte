@@ -1,31 +1,29 @@
 <script lang="ts">
-    import { LocalEmbeddingAdapter } from "$lib/embeddings/LocalEmbeddingAdapter";
+    import { createEventDispatcher } from 'svelte';
 
-    export let adapter : LocalEmbeddingAdapter; 
+    const dispatch = createEventDispatcher();
     let text : string = '';
     // let oldtext : string = '';
-    let embedding : number[] = [];
     let debounce : NodeJS.Timeout = setTimeout(() => {}, 0); 
 
-    async function updateEmbedding() {
+    async function inputBarUpdated() {
         
         // Make sure embedding is updated every 125 ms
         clearTimeout(debounce);
         debounce = setTimeout((async (t : string) => {
-            if (text == t) {
-                embedding = (await adapter.embed(text)).vec;
-            }
+            if (text == t)
+                dispatch('inputbarupdate', {text});
         }).bind(null, text), 125);
 
         // Trigger re-embed every 4 characters or every word
         // if (text.split(" ").length != oldtext.split(" ").length || 
         //    Math.abs(text.length - oldtext.length) >= 4) {
         //    oldtext = text;
-        //    embedding = (await adapter.embed(text)).vec;
+        //    dispatch('inputbarupdate', {text});
         // }
     }
 
-    $: text && updateEmbedding();
+    $: text && inputBarUpdated();
 </script>
 
 <div class="fixed bottom-0 w-full h-[20%]">
