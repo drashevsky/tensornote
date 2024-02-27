@@ -1,35 +1,50 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { LocalEmbeddingAdapter } from "$lib/embeddings/LocalEmbeddingAdapter";
     import { BlockStore, type Block } from "$lib/BlockStore";
 
     import NavBar from "./NavBar.svelte";
     import Notes from "./Notes.svelte";
     import InputBar from './InputBar.svelte';
 
-    let adapter : LocalEmbeddingAdapter;
+    let adapter : Worker;
     let store : BlockStore = new BlockStore();
     let embedding : number[] = [];
+    let inputEvent : CustomEvent = new CustomEvent("none");
 
     onMount(async () => {
-        console.log("Initializing embeddings model...");
-        adapter = await LocalEmbeddingAdapter.create("Xenova/jina-embeddings-v2-small-en-8192");
-        console.log(adapter.config.model_name + " ready.");
+        const w = await import('$lib/embeddings/AdapterWorker.ts?worker');
+        adapter = new w.default();
+        adapter.postMessage({type: "init", value: "TaylorAI/bge-micro-v2"});
+        adapter.addEventListener("message", handleAdapter);
     });
 
-    async function handleInputBar(event : CustomEvent) {
-        embedding = (await adapter.embed(event.detail.text)).vec;
-        if (event.detail.submit && !store.contains(event.detail.text)) {
-            store.add({
-                text: event.detail.text,
-                vec: (await adapter.embed(event.detail.text)).vec,
-                timestamp: Date.now()
-            });
-            store = store;
+    function handleAdapter(msg : MessageEvent) {
+        if (msg.data.type == "init" && msg.data.value == true) {
+            console.log("Confirmed worker creation.");
+
+        } else if (msg.data.type == "embed") {
+            embedding = msg.data.value;
+
+            if (inputEvent.type == "inputbarupdate" && 
+                inputEvent.detail.submit && 
+                !store.contains(inputEvent.detail.text)) {
+
+                store.add({
+                    text: inputEvent.detail.text,
+                    vec: embedding,
+                    timestamp: Date.now()
+                });
+
+                inputEvent = new CustomEvent("none");
+                store = store;  
+            }
         }
     }
 </script>
 
 <NavBar />
 <Notes {store}/>
-<InputBar on:inputbarupdate={handleInputBar}/>
+<InputBar on:inputbarupdate={(event) => {
+    adapter.postMessage({type: "embed", value: event.detail.text});
+    inputEvent = event;
+}}/>
