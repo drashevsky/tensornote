@@ -9,7 +9,7 @@
     let adapter : Worker;
     let store : BlockStore = new BlockStore();
     let embedding : number[] = [];
-    let inputEvent : CustomEvent = new CustomEvent("none");
+    let inputEvents : CustomEvent[] = [];
 
     onMount(async () => {
         const w = await import('$lib/embeddings/AdapterWorker.ts?worker');
@@ -29,17 +29,13 @@
         } else if (msg.data.type == "embed") {
             embedding = msg.data.value;
 
-            if (inputEvent.type == "inputbarupdate" && 
-                inputEvent.detail.submit && 
-                !store.contains(inputEvent.detail.text)) {
-
+            let e = inputEvents.shift();
+            if (e !== undefined && e.detail.submit && !store.contains(e.detail.text)) {
                 store.add({
-                    text: inputEvent.detail.text,
+                    text: e.detail.text,
                     vec: embedding,
                     timestamp: Date.now()
                 });
-
-                inputEvent = new CustomEvent("none");
                 store = store;  
             }
         }
@@ -50,5 +46,5 @@
 <Notes {store}/>
 <InputBar on:inputbarupdate={(event) => {
     adapter.postMessage({type: "embed", value: event.detail.text});
-    inputEvent = event;
+    inputEvents.push(event);
 }}/>
