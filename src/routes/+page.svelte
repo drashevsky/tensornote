@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { onMount } from "svelte";
+    import { onMount, onDestroy } from "svelte";
     import { BlockStore, type Block } from "$lib/BlockStore";
 
     import NavBar from "./NavBar.svelte";
@@ -16,6 +16,10 @@
         adapter = new w.default();
         adapter.postMessage({type: "init", value: "TaylorAI/bge-micro-v2"});
         adapter.addEventListener("message", handleAdapter);
+    });
+
+    onDestroy(() => {
+        adapter.terminate();
     });
 
     function handleAdapter(msg : MessageEvent) {
