@@ -6,13 +6,13 @@
     // let oldtext : string = '';
     let debounce : NodeJS.Timeout = setTimeout(() => {}, 0); 
 
-    async function inputBarUpdated() {
+    function inputBarUpdated() {
         
         // Make sure embedding is updated every 125 ms
         clearTimeout(debounce);
         debounce = setTimeout((async (t : string) => {
             if (text == t)
-                dispatch('inputbarupdate', {text});
+                dispatch('inputbarupdate', {text, submit: false});
         }).bind(null, text), 125);
 
         // Trigger re-embed every 4 characters or every word
@@ -23,9 +23,20 @@
         // }
     }
 
+    function handleSubmit(e : KeyboardEvent) {
+        if (e.key == "Enter" && text != "") {
+            e.preventDefault();
+            clearTimeout(debounce);
+            dispatch('inputbarupdate', {text, submit: true});
+            text = "";
+        }
+    }
+
     $: text && inputBarUpdated();
 </script>
 
 <div class="fixed bottom-0 w-full h-[20%]">
-    <textarea class="w-full h-full" placeholder="Type or search for a note." bind:value={text}/>
+    <textarea class="w-full h-full" placeholder="Type or search for a note." 
+        bind:value={text}
+        on:keydown={handleSubmit}/>
 </div>

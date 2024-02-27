@@ -1,11 +1,14 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import { LocalEmbeddingAdapter } from "$lib/embeddings/LocalEmbeddingAdapter";
+    import { BlockStore, type Block } from "$lib/BlockStore";
+
     import NavBar from "./NavBar.svelte";
     import Notes from "./Notes.svelte";
     import InputBar from './InputBar.svelte';
 
     let adapter : LocalEmbeddingAdapter;
+    let store : BlockStore = new BlockStore();
     let embedding : number[] = [];
 
     onMount(async () => {
@@ -14,11 +17,19 @@
         console.log(adapter.config.model_name + " ready.");
     });
 
-    async function updateEmbedding(event : CustomEvent) {
+    async function handleInputBar(event : CustomEvent) {
         embedding = (await adapter.embed(event.detail.text)).vec;
+        if (event.detail.submit && !store.contains(event.detail.text)) {
+            store.add({
+                text: event.detail.text,
+                vec: (await adapter.embed(event.detail.text)).vec,
+                timestamp: Date.now()
+            });
+            store = store;
+        }
     }
 </script>
 
 <NavBar />
-<Notes {embedding}/>
-<InputBar on:inputbarupdate={updateEmbedding}/>
+<Notes {store}/>
+<InputBar on:inputbarupdate={handleInputBar}/>
