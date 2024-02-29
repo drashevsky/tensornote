@@ -1,5 +1,6 @@
 import { LocalEmbeddingAdapter } from "$lib/embeddings/LocalEmbeddingAdapter";
 
+// Can replace with different adapter if needed
 let adapter : LocalEmbeddingAdapter;
 
 self.onmessage = async function(msg) {
