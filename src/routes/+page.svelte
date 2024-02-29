@@ -12,7 +12,7 @@
     let inputEvents : CustomEvent[] = [];
 
     onMount(async () => {
-        const w = await import('$lib/embeddings/AdapterWorker.ts?worker');
+        const w = await import('$lib/embeddings/EmbeddingAdapterWorker.ts?worker');
         adapter = new w.default();
         adapter.postMessage({type: "init", value: "TaylorAI/bge-micro-v2"});
         adapter.addEventListener("message", handleAdapter);
