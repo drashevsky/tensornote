@@ -30,9 +30,9 @@
             embedding = msg.data.value;
 
             let e = inputEvents.shift();
-            if (e !== undefined && e.detail.submit && !store.has(e.detail.text)) {
-                store.set(e.detail.text, {
-                    vec: embedding,
+            if (e !== undefined && e.detail.submit && !store.has(embedding)) {
+                store.set(embedding, {
+                    text: e.detail.text,
                     timestamp: Date.now()
                 });
                 store = store;  

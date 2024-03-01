@@ -1,3 +1,3 @@
-export class BlockStore extends Map<string, {vec: number[], timestamp: number}> {
+export class BlockStore extends Map<number[], {text: string, timestamp: number}> {
 
 }
