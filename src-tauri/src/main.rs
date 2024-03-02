@@ -8,6 +8,9 @@ use ndarray::Array2;
 use ndarray_rand::rand::SeedableRng;
 use rand_xoshiro::Xoshiro256Plus;
 
+mod cosdist;
+use cosdist::CosDist;
+
 fn main() {
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![cluster])
@@ -25,8 +28,8 @@ fn cluster(embeddings: Vec<f32>,
     // Code taken from https://docs.rs/linfa-clustering/latest/linfa_clustering/struct.KMeans.html#tutorial
     let mut rng = Xoshiro256Plus::seed_from_u64(42);
     let data = Array2::from_shape_vec((embeddings_cnt, embeddings_dims), embeddings).unwrap();
-    let observations = DatasetBase::from(data.clone()).shuffle(&mut rng);                       // Imports the 2d matrix
-    let clf = KMeans::params_with_rng(n_clusters, rng.clone()).tolerance(1e-3);                 // Sets up kmeans
+    let observations = DatasetBase::from(data.clone()).shuffle(&mut rng);               // Imports the 2d matrix
+    let clf = KMeans::params_with(n_clusters, rng.clone(), CosDist).tolerance(1e-3);    // Sets up kmeans
 
     // Repeatedly run fit_with on every batch in the dataset until we have converged.
     // fit_with implements the mini-batch-k-means algorithm

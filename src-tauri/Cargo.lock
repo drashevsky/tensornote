@@ -68,6 +68,7 @@ version = "0.1.0"
 dependencies = [
  "linfa",
  "linfa-clustering",
+ "linfa-nn",
  "ndarray",
  "ndarray-rand",
  "rand_xoshiro",
