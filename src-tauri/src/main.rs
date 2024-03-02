@@ -56,7 +56,7 @@ fn cluster(embeddings: Vec<f32>,
         records, targets, ..
     } = dataset;
 
-    // Return 2d matrices of centroids, original embeddings, cluster assignments
+    // Return flattened 2d matrices of centroids and original embeddings, arr of cluster assignments
     (centroids.into_raw_vec(), 
      records.into_raw_vec(), 
      targets.map(|&x| x as u64).into_raw_vec())
