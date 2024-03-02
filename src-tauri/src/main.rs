@@ -24,7 +24,7 @@ fn main() {
     .expect("error while running tauri application");
 }
 
-#[tauri::command]
+#[tauri::command(rename_all = "snake_case")]
 fn cluster(embeddings: Vec<f32>,
            embeddings_cnt: usize,
            embeddings_dims: usize,
