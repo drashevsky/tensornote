@@ -9,14 +9,21 @@ interface NavTreeNode {
 }
 
 export class NavTree {
-    root: NavTreeNode;
+    private _root: NavTreeNode;
 
-    constructor() {
-        this.root = {embedding: [], children: []}
+    constructor(embeddings?: number[][]) {
+        this._root = {embedding: [], children: []}
+        if (embeddings) {
+            this.buildTree(embeddings);
+        }
+    }
+
+    public get root() {
+        return this._root;
     }
 
     // Take list of embeddings, cluster them, and rebuild the navigation tree
-    async buildTree(embeddings: number[][]) {
+    public async buildTree(embeddings: number[][]) {
 
         // Known bug: cannot handle edge case, cluster of 1 block
 
@@ -27,7 +34,7 @@ export class NavTree {
         // Less than or equal to ROOT_CHILDREN_MAX, no need to cluster
         } else if (embeddings.length <= ROOT_CHILDREN_MAX) {
             embeddings.forEach((embedding) => {
-                this.root.children.push({embedding, children: []})
+                this._root.children.push({embedding, children: []})
             });
             return;
         }
@@ -39,7 +46,7 @@ export class NavTree {
         while (embeddings.length > ROOT_CHILDREN_MAX) {
 
             // Cluster embeddings
-            let [centroids, records, targets] = await this.cluster(embeddings);
+            let [centroids, records, targets] = await cluster(embeddings);
 
              // Create NavTree internal nodes for centroids
             let centroidsMatrix = arrayToMatrix(centroids, embeddings[0].length);
@@ -69,23 +76,23 @@ export class NavTree {
             prevInternalNodes = internalNodes;
         }
 
-        this.root.children = prevInternalNodes;
-    }
-
-    // Given a list of embeddings, returns flattened 2d matrices of centroids and original 
-    // embeddings, as well as an array of cluster assignments
-    async cluster(embeddings: number[][]): Promise<[number[], number[], number[]]> {
-        let embeddings_cnt = embeddings.length;
-        let embeddings_dims = embeddings[0].length;
-        return await invoke('cluster', { 
-            embeddings: embeddings.flat(), 
-            embeddings_cnt, 
-            embeddings_dims,
-            batch_size: (embeddings_cnt < BATCH_SIZE) ? embeddings_cnt : BATCH_SIZE,
-            n_clusters: Math.ceil(Math.sqrt(embeddings_cnt / 2))
-        });
+        this._root.children = prevInternalNodes;
     }
 }  
+
+// Given a list of embeddings, returns flattened 2d matrices of centroids and original 
+// embeddings, as well as an array of cluster assignments
+async function cluster(embeddings: number[][]): Promise<[number[], number[], number[]]> {
+    let embeddings_cnt = embeddings.length;
+    let embeddings_dims = embeddings[0].length;
+    return await invoke('cluster', { 
+        embeddings: embeddings.flat(), 
+        embeddings_cnt, 
+        embeddings_dims,
+        batch_size: (embeddings_cnt < BATCH_SIZE) ? embeddings_cnt : BATCH_SIZE,
+        n_clusters: Math.ceil(Math.sqrt(embeddings_cnt / 2))
+    });
+}
 
 // Take a flattened matrix and turn it into a 2d matrix
 function arrayToMatrix(arr: number[], row_length: number) {
