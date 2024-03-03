@@ -1,5 +1,4 @@
 import { invoke } from '@tauri-apps/api/tauri'
-import { BlockStore } from './BlockStore';
 
 let BATCH_SIZE = 128;           //https://ai.stackexchange.com/questions/8560/how-do-i-choose-the-optimal-batch-size
 let ROOT_CHILDREN_MAX = 7;      //https://www.crossrivertherapy.com/memory-capacity-of-human-brain
@@ -51,7 +50,7 @@ export class NavTree {
             // Make a temp map of prevInternalNodes if they exist
             let prevInternalNodesMap = new Map<string, NavTreeNode>();
             prevInternalNodes.forEach((node) => {
-                // I know this is bad, but wtf am I supposed to do?
+                // Using first 10 floats as a key, that's good enough don't @ me bro
                 prevInternalNodesMap.set(JSON.stringify(node.embedding.slice(0, 10)), node)
             });
 
