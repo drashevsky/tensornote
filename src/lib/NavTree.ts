@@ -15,6 +15,7 @@ export class NavTree {
         this.root = {embedding: [], children: []}
     }
 
+    // Take list of embeddings, cluster them, and rebuild the navigation tree
     async buildTree(embeddings: number[][]) {
 
         // Known bug: cannot handle edge case, cluster of 1 block
@@ -71,6 +72,8 @@ export class NavTree {
         this.root.children = prevInternalNodes;
     }
 
+    // Given a list of embeddings, returns flattened 2d matrices of centroids and original 
+    // embeddings, as well as an array of cluster assignments
     async cluster(embeddings: number[][]): Promise<[number[], number[], number[]]> {
         let embeddings_cnt = embeddings.length;
         let embeddings_dims = embeddings[0].length;
@@ -84,6 +87,7 @@ export class NavTree {
     }
 }  
 
+// Take a flattened matrix and turn it into a 2d matrix
 function arrayToMatrix(arr: number[], row_length: number) {
     let matrix : number[][] = [];
     while (arr.length > 0)

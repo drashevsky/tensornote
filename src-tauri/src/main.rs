@@ -24,6 +24,7 @@ fn main() {
     .expect("error while running tauri application");
 }
 
+// Take a vector containing a flattened matrix and cluster it
 #[tauri::command(rename_all = "snake_case")]
 fn cluster(embeddings: Vec<f32>,
            embeddings_cnt: usize,
@@ -50,6 +51,7 @@ fn cluster(embeddings: Vec<f32>,
         })
         .unwrap_err();
 
+    // Extract centroids and cluster assignments
     let dataset = model.predict(dataset);
     let centroids = model.centroids().clone();
     let DatasetBase {
