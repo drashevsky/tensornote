@@ -3,7 +3,7 @@ import { invoke } from '@tauri-apps/api/tauri'
 let BATCH_SIZE = 128;           //https://ai.stackexchange.com/questions/8560/how-do-i-choose-the-optimal-batch-size
 let ROOT_CHILDREN_MAX = 7;      //https://www.crossrivertherapy.com/memory-capacity-of-human-brain
 
-interface NavTreeNode {
+export interface NavTreeNode {
     embedding: number[],
     children: NavTreeNode[]
 }
@@ -47,6 +47,10 @@ export class NavTree {
 
             // Cluster embeddings
             let [centroids, records, targets] = await cluster(embeddings);
+
+            // Reduce precision to 8 decimal places like in LocalEmbeddingAdapter
+            centroids = centroids.map(val => Math.round(val * 100000000) / 100000000);
+            records = records.map(val => Math.round(val * 100000000) / 100000000);
 
              // Create NavTree internal nodes for centroids
             let centroidsMatrix = arrayToMatrix(centroids, embeddings[0].length);
