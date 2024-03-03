@@ -18,6 +18,8 @@ export class NavTree {
 
     async buildTree(embeddings: number[][]) {
 
+        // Known bug: cannot handle edge case, cluster of 1 block
+
         // Cannot cluster 0 elements
         if (embeddings.length == 0) {
             return;
@@ -47,14 +49,18 @@ export class NavTree {
             }
 
             // Make a temp map of prevInternalNodes if they exist
-            let prevInternalNodesMap = new Map<number[], NavTreeNode>();
-            prevInternalNodes.forEach((node) => {prevInternalNodesMap.set(node.embedding, node)});
+            let prevInternalNodesMap = new Map<string, NavTreeNode>();
+            prevInternalNodes.forEach((node) => {
+                // I know this is bad, but wtf am I supposed to do?
+                prevInternalNodesMap.set(JSON.stringify(node.embedding.slice(0, 10)), node)
+            });
 
             // Assign children to internal nodes, use previous run's internal nodes 
             // as children if they exist
             for (let i = 0; records.length > 0; i++) {
                 let embedding = records.splice(0, embeddings[0].length);
-                let child = (prevInternalNodesMap.get(embedding)) || {embedding, children: []};
+                let child = prevInternalNodesMap.get(JSON.stringify(embedding.slice(0, 10))) || 
+                            {embedding, children: []};
                 internalNodes[targets[i]].children.push(child);
             }
 

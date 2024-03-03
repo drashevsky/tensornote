@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount, onDestroy } from "svelte";
-    import { BlockStore } from "$lib/BlockStore";
+    import { BlockStore, hashCode } from "$lib/BlockStore";
 
     import NavBar from "./NavBar.svelte";
     import Notes from "./Notes.svelte";
@@ -30,9 +30,10 @@
             embedding = msg.data.value;
 
             let e = inputEvents.shift();
-            if (e !== undefined && e.detail.submit && !store.has(embedding)) {
-                store.set(embedding, {
+            if (e !== undefined && e.detail.submit && !store.has(hashCode(e.detail.text))) {
+                store.set(hashCode(e.detail.text), {
                     text: e.detail.text,
+                    vec: embedding,
                     timestamp: Date.now()
                 });
                 store = store;  
