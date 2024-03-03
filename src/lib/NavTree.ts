@@ -16,7 +16,57 @@ export class NavTree {
         this.root = {embedding: [], children: []}
     }
 
-    async cluster(embeddings: number[][]) {
+    async buildTree(embeddings: number[][]) {
+
+        // Cannot cluster 0 elements
+        if (embeddings.length == 0) {
+            return;
+
+        // Less than or equal to ROOT_CHILDREN_MAX, no need to cluster
+        } else if (embeddings.length <= ROOT_CHILDREN_MAX) {
+            embeddings.forEach((embedding) => {
+                this.root.children.push({embedding, children: []})
+            });
+            return;
+        }
+
+        // In a loop, cluster this round of embeddings and then prepare the clusters to be assigned
+        // as child nodes of the next round's clusters
+ 
+        let prevInternalNodes : NavTreeNode[] = [];
+        while (embeddings.length > ROOT_CHILDREN_MAX) {
+
+            // Cluster embeddings
+            let [centroids, records, targets] = await this.cluster(embeddings);
+
+             // Create NavTree internal nodes for centroids
+            let centroidsMatrix = arrayToMatrix(centroids, embeddings[0].length);
+            let internalNodes : NavTreeNode[] = [];
+            for (let i = 0; i < centroidsMatrix.length; i++) {
+                internalNodes.push({embedding: centroidsMatrix[i], children: []});
+            }
+
+            // Make a temp map of prevInternalNodes if they exist
+            let prevInternalNodesMap = new Map<number[], NavTreeNode>();
+            prevInternalNodes.forEach((node) => {prevInternalNodesMap.set(node.embedding, node)});
+
+            // Assign children to internal nodes, use previous run's internal nodes 
+            // as children if they exist
+            for (let i = 0; records.length > 0; i++) {
+                let embedding = records.splice(0, embeddings[0].length);
+                let child = (prevInternalNodesMap.get(embedding)) || {embedding, children: []};
+                internalNodes[targets[i]].children.push(child);
+            }
+
+            // Setup centroids to be clustered, and make them next round's children
+            embeddings = centroidsMatrix;
+            prevInternalNodes = internalNodes;
+        }
+
+        this.root.children = prevInternalNodes;
+    }
+
+    async cluster(embeddings: number[][]): Promise<[number[], number[], number[]]> {
         let embeddings_cnt = embeddings.length;
         let embeddings_dims = embeddings[0].length;
         return await invoke('cluster', { 
@@ -28,3 +78,10 @@ export class NavTree {
         });
     }
 }  
+
+function arrayToMatrix(arr: number[], row_length: number) {
+    let matrix : number[][] = [];
+    while (arr.length > 0)
+        matrix.push(arr.splice(0, row_length));
+    return matrix;
+}
