@@ -21,7 +21,7 @@ pub fn kmeans_cluster(embeddings: Vec<f32>,
            embeddings_cnt: usize,
            embeddings_dims: usize,
            batch_size: usize,
-           n_clusters: usize, ) -> (Vec<f32>, Vec<f32>, Vec<u64>) {
+           n_clusters: usize, ) -> (Vec<f32>, Vec<f32>, Vec<i64>) {
    
     let mut rng = Xoshiro256Plus::seed_from_u64(42);
     let data = Array2::from_shape_vec((embeddings_cnt, embeddings_dims), embeddings).unwrap();
@@ -52,7 +52,7 @@ pub fn kmeans_cluster(embeddings: Vec<f32>,
     // Return flattened 2d matrices of centroids and original embeddings, arr of cluster assignments
     (centroids.into_raw_vec(), 
      records.into_raw_vec(), 
-     targets.map(|&x| x as u64).into_raw_vec())
+     targets.map(|&x| x as i64).into_raw_vec())
 }
 
 // Take a vector containing a flattened matrix and cluster it using dbscan
@@ -77,9 +77,17 @@ pub fn dbscan_cluster(embeddings: Vec<f32>,
     let label_count = cluster_memberships.label_count().remove(0);
     let modify = if label_count.contains_key(&None) { 1 }  else { 0 };
     let mut centroids: Vec<f32> = vec![0.0; (label_count.len() - modify) * embeddings_dims];
+    let mut noise_pts: Vec<f32> = Vec::new();
     for label in label_count.into_keys() {
         match label {
-            None => (),
+
+            // Noise points have their own label, each will be added to centroids list individually
+            None => {
+                let embeddings_of_label = cluster_memberships.with_labels(&[None]);
+                noise_pts.extend(embeddings_of_label.records.into_raw_vec());
+            },
+
+            // Get the labeled points of each cluster and take their mean to generate centroid
             Some(i) => {
                 let embeddings_of_label = cluster_memberships.with_labels(&[Some(i)]);
                 let mean_centroid = embeddings_of_label.records.mean_axis(Axis(0))
@@ -91,6 +99,7 @@ pub fn dbscan_cluster(embeddings: Vec<f32>,
             },
         }
     }
+    centroids.extend(noise_pts);
 
     // Extract cluster assignments
     let DatasetBase {

@@ -2,6 +2,7 @@ import { invoke } from '@tauri-apps/api/tauri'
 
 let BATCH_SIZE = 128;           //https://ai.stackexchange.com/questions/8560/how-do-i-choose-the-optimal-batch-size
 let ROOT_CHILDREN_MAX = 7;      //https://www.crossrivertherapy.com/memory-capacity-of-human-brain
+let DBSCAN_MIN_CLUSTER_PTS = 4;
 
 export interface NavTreeNode {
     embedding: number[],
@@ -47,7 +48,7 @@ export class NavTree {
         while (embeddings.length > ROOT_CHILDREN_MAX) {
 
             // Cluster embeddings
-            let [centroids, records, targets] = await cluster(embeddings);
+            let [centroids, records, targets] = await kmeans_cluster(embeddings);
 
             // Reduce precision to 8 decimal places like in LocalEmbeddingAdapter
             centroids = centroids.map(val => Math.round(val * 100000000) / 100000000);
@@ -73,7 +74,7 @@ export class NavTree {
                 let embedding = records.splice(0, embeddings[0].length);
                 let child = prevInternalNodesMap.get(JSON.stringify(embedding.slice(0, 10))) || 
                             {embedding, children: []};
-                internalNodes[targets[i]].children.push(child);
+                if (targets[i] > -1) internalNodes[targets[i]].children.push(child);
             }
 
             // Setup centroids to be clustered, and make them next round's children
@@ -86,8 +87,8 @@ export class NavTree {
 }  
 
 // Given a list of embeddings, returns flattened 2d matrices of centroids and original 
-// embeddings, as well as an array of cluster assignments
-async function cluster(embeddings: number[][]): Promise<[number[], number[], number[]]> {
+// embeddings, as well as an array of cluster assignments using kmeans
+async function kmeans_cluster(embeddings: number[][]): Promise<[number[], number[], number[]]> {
     let embeddings_cnt = embeddings.length;
     let embeddings_dims = embeddings[0].length;
     return await invoke('kmeans_cluster', { 
@@ -96,6 +97,19 @@ async function cluster(embeddings: number[][]): Promise<[number[], number[], num
         embeddings_dims,
         batch_size: (embeddings_cnt < BATCH_SIZE) ? embeddings_cnt : BATCH_SIZE,
         n_clusters: Math.ceil(Math.sqrt(embeddings_cnt / 2))
+    });
+}
+
+// Given a list of embeddings, returns flattened 2d matrices of centroids + noise points 
+// and original embeddings, as well as an array of cluster assignments using dbscan
+async function dbscan_cluster(embeddings: number[][]): Promise<[number[], number[], number[]]> {
+    let embeddings_cnt = embeddings.length;
+    let embeddings_dims = embeddings[0].length;
+    return await invoke('dbscan_cluster', { 
+        embeddings: embeddings.flat(), 
+        embeddings_cnt, 
+        embeddings_dims,
+        min_cluster_pts: DBSCAN_MIN_CLUSTER_PTS
     });
 }
 
