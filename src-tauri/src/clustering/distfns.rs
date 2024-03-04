@@ -1,10 +1,12 @@
+// Portions of this code were taken from linfa under license:
+// https://github.com/rust-ml/linfa/blob/master/LICENSE-MIT
+
 use linfa::Float;
 use linfa_nn::distance::Distance;
 use ndarray::{ArrayView, Dimension, Zip};
 
 #[cfg(feature = "serde")]
 use serde_crate::{Deserialize, Serialize};
-
 
 // Cosine distance: https://en.wikipedia.org/wiki/Cosine_similarity#Cosine_distance
 #[cfg_attr(
