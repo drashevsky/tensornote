@@ -14,8 +14,8 @@ use ndarray::Array2;
 use ndarray_rand::rand::SeedableRng;
 use rand_xoshiro::Xoshiro256Plus;
 
-mod cosdist;
-use cosdist::CosDist;
+mod distfns;
+use distfns::CosDist;
 
 fn main() {
   tauri::Builder::default()
