@@ -90,7 +90,7 @@ export class NavTree {
 async function cluster(embeddings: number[][]): Promise<[number[], number[], number[]]> {
     let embeddings_cnt = embeddings.length;
     let embeddings_dims = embeddings[0].length;
-    return await invoke('cluster', { 
+    return await invoke('kmeans_cluster', { 
         embeddings: embeddings.flat(), 
         embeddings_cnt, 
         embeddings_dims,
