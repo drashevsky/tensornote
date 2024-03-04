@@ -75,7 +75,8 @@ pub fn dbscan_cluster(embeddings: Vec<f32>,
     
     // Generate centroids
     let label_count = cluster_memberships.label_count().remove(0);
-    let mut centroids: Vec<f32> = vec![0.0; label_count.len() * embeddings_dims];
+    let modify = if label_count.contains_key(&None) { 1 }  else { 0 };
+    let mut centroids: Vec<f32> = vec![0.0; (label_count.len() - modify) * embeddings_dims];
     for label in label_count.into_keys() {
         match label {
             None => (),
