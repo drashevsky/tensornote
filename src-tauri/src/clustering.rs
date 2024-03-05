@@ -7,10 +7,11 @@
 use linfa::dataset::{DatasetBase, Labels};
 use linfa::traits::{FitWith, Predict, Transformer};
 use linfa_clustering::{KMeans, IncrKMeansError, Dbscan};
-use linfa_nn::CommonNearestNeighbour::KdTree;
+use linfa_nn::{KdTree, NearestNeighbour, distance::Distance};
 use ndarray::{Array2, Axis};
 use ndarray_rand::rand::SeedableRng;
 use rand_xoshiro::Xoshiro256Plus;
+use std::cmp::Ordering;
 
 mod distfns;
 use distfns::CosDist;
@@ -67,9 +68,26 @@ pub fn dbscan_cluster(embeddings: Vec<f32>,
     let data = Array2::from_shape_vec((embeddings_cnt, embeddings_dims), embeddings).unwrap();
     let dataset = DatasetBase::from(data.clone()).shuffle(&mut rng);
 
+    // Run nearest neighbors to find a good epsilon value
+    // https://towardsdatascience.com/machine-learning-clustering-dbscan-determine-the-optimal-value-for-epsilon-eps-python-example-3100091cfbc
+    let nnindex = KdTree::new().from_batch(&data, CosDist).unwrap();
+    let mut distances: Vec<f32> = Vec::new();
+    for embedding in data.axis_iter(Axis(0)) {
+        let nearest_pt = nnindex.k_nearest(embedding, 3).unwrap()[2].0;
+        distances.push(CosDist.distance(embedding, nearest_pt));
+    }
+
+    // Sort the distances and use the biggest difference between any two vector elements
+    // as the epsilon
+    distances.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal));
+    let epsilon = distances.windows(2)
+                           .map(|window| window[1] - window[0])
+                           .max_by(|a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal))
+                           .unwrap();
+
     // Set up dbscan and run the model
     let cluster_memberships = Dbscan::params_with(min_cluster_pts, CosDist, KdTree)
-        .tolerance(1e-3)
+        .tolerance(epsilon)
         .transform(dataset)
         .unwrap();
     
