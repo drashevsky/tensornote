@@ -73,7 +73,7 @@ pub fn dbscan_cluster(embeddings: Vec<f32>,
     let nnindex = KdTree::new().from_batch(&data, CosDist).unwrap();
     let mut distances: Vec<f32> = Vec::new();
     for embedding in data.axis_iter(Axis(0)) {
-        let nearest_pt = nnindex.k_nearest(embedding, 3).unwrap()[2].0;
+        let nearest_pt = nnindex.k_nearest(embedding, 3).unwrap()[2].0; // using third nearest neighbor
         distances.push(CosDist.distance(embedding, nearest_pt));
     }
 
