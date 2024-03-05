@@ -18,11 +18,11 @@ use distfns::CosDist;
 
 // Take a vector containing a flattened matrix and cluster it using kmeans
 #[tauri::command(rename_all = "snake_case")]
-pub fn kmeans_cluster(embeddings: Vec<f64>,
+pub fn kmeans_cluster(embeddings: Vec<f32>,
            embeddings_cnt: usize,
            embeddings_dims: usize,
            batch_size: usize,
-           n_clusters: usize, ) -> (Vec<f64>, Vec<f64>, Vec<i64>) {
+           n_clusters: usize, ) -> (Vec<f32>, Vec<f32>, Vec<i64>) {
    
     let mut rng = Xoshiro256Plus::seed_from_u64(42);
     let data = Array2::from_shape_vec((embeddings_cnt, embeddings_dims), embeddings).unwrap();
@@ -58,10 +58,10 @@ pub fn kmeans_cluster(embeddings: Vec<f64>,
 
 // Take a vector containing a flattened matrix and cluster it using dbscan
 #[tauri::command(rename_all = "snake_case")]
-pub fn dbscan_cluster(embeddings: Vec<f64>,
+pub fn dbscan_cluster(embeddings: Vec<f32>,
                   embeddings_cnt: usize,
                   embeddings_dims: usize,
-                  min_cluster_pts: usize) -> (Vec<f64>, Vec<f64>, Vec<i64>) {
+                  min_cluster_pts: usize) -> (Vec<f32>, Vec<f32>, Vec<i64>) {
 
     // Imports the 2d embeddings matrix
     let mut rng = Xoshiro256Plus::seed_from_u64(42);
@@ -71,7 +71,7 @@ pub fn dbscan_cluster(embeddings: Vec<f64>,
     // Run nearest neighbors to find a good epsilon value
     // https://towardsdatascience.com/machine-learning-clustering-dbscan-determine-the-optimal-value-for-epsilon-eps-python-example-3100091cfbc
     let nnindex = KdTree::new().from_batch(&data, CosDist).unwrap();
-    let mut distances: Vec<f64> = Vec::new();
+    let mut distances: Vec<f32> = Vec::new();
     for embedding in data.axis_iter(Axis(0)) {
         let nearest_pt = nnindex.k_nearest(embedding, 3).unwrap()[2].0; // using third nearest neighbor
         distances.push(CosDist.distance(embedding, nearest_pt));
@@ -94,8 +94,8 @@ pub fn dbscan_cluster(embeddings: Vec<f64>,
     // Generate centroids
     let label_count = cluster_memberships.label_count().remove(0);
     let modify = if label_count.contains_key(&None) { 1 }  else { 0 };
-    let mut centroids: Vec<f64> = vec![0.0; (label_count.len() - modify) * embeddings_dims];
-    let mut noise_pts: Vec<f64> = Vec::new();
+    let mut centroids: Vec<f32> = vec![0.0; (label_count.len() - modify) * embeddings_dims];
+    let mut noise_pts: Vec<f32> = Vec::new();
     for label in label_count.into_keys() {
         match label {
 
