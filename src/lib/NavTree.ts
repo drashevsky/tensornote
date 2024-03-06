@@ -26,7 +26,7 @@ export class NavTree {
     // Take list of embeddings, cluster them, and rebuild the navigation tree
     public async buildTree(embeddings: number[][]) {
 
-        // Known bug: cannot handle edge case, cluster of 1 block
+        // Known bug: duplicate centroids break the algorithm
 
         // Cannot cluster 0 elements
         if (embeddings.length == 0) {
@@ -70,7 +70,11 @@ export class NavTree {
                 let embedding = records.splice(0, embeddings[0].length);
                 let prevNodeIdx = prevInternalNodesMap.get(key(embedding));
                 let child = prevNodeIdx ? prevInternalNodes[prevNodeIdx] : {embedding, children: []};
-                if (targets[i] > -1) internalNodes[targets[i]].children.push(child);
+
+                // Child not a dbscan noise pt or existing internal node
+                // (in the case of single point clusters)
+                if (targets[i] > -1 && !internalNodesMap.has(key(embedding)))
+                    internalNodes[targets[i]].children.push(child);
             }
 
             // Setup centroids to be clustered, and make them next round's children
