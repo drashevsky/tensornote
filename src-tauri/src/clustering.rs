@@ -77,13 +77,14 @@ pub fn dbscan_cluster(embeddings: Vec<f32>,
         distances.push(CosDist.distance(embedding, nearest_pt));
     }
 
-    // Sort the distances and use the biggest difference between any two vector elements
-    // as the epsilon
+    // Sort the distances and use the distance at the steepest point of the array as the epsilon
     distances.sort_by(|a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal));
-    let epsilon = distances.windows(2)
-                           .map(|window| window[1] - window[0])
-                           .max_by(|a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal))
-                           .unwrap();
+    let (_max_diff, eps_index) = distances.windows(2)
+                                          .enumerate()
+                                          .map(|(i, window)| (window[1] - window[0], i))
+                                          .max_by(|a, b| a.0.partial_cmp(&b.0).unwrap_or(Ordering::Equal))
+                                          .unwrap();
+    let epsilon = (distances[eps_index] + distances[eps_index + 1]) / 2.0;
 
     // Set up dbscan and run the model
     let cluster_memberships = Dbscan::params_with(min_cluster_pts, CosDist, KdTree)
