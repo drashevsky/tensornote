@@ -62,18 +62,14 @@ export class NavTree {
             }
 
             // Make a temp map of prevInternalNodes if they exist
-            let prevInternalNodesMap = new Map<string, NavTreeNode>();
-            prevInternalNodes.forEach((node) => {
-                // Using first 10 floats as a key, that's good enough don't @ me bro
-                prevInternalNodesMap.set(JSON.stringify(node.embedding.slice(0, 10)), node)
-            });
+            let prevInternalNodesMap = arrayToMap(prevInternalNodes);
 
             // Assign children to internal nodes, use previous run's internal nodes 
             // as children if they exist
             for (let i = 0; records.length > 0; i++) {
                 let embedding = records.splice(0, embeddings[0].length);
-                let child = prevInternalNodesMap.get(JSON.stringify(embedding.slice(0, 10))) || 
-                            {embedding, children: []};
+                let prevNodeIdx = prevInternalNodesMap.get(JSON.stringify(embedding.slice(0, 10))); 
+                let child = prevNodeIdx ? prevInternalNodes[prevNodeIdx] : {embedding, children: []};
                 if (targets[i] > -1) internalNodes[targets[i]].children.push(child);
             }
 
@@ -119,4 +115,15 @@ function arrayToMatrix(arr: number[], row_length: number) {
     while (arr.length > 0)
         matrix.push(arr.splice(0, row_length));
     return matrix;
+}
+
+// Take an array of NavTreeNodes and turn it into a key -> array index map 
+function arrayToMap(nodes: NavTreeNode[]) {
+    let m = new Map<string, number>();
+    for (let i = 0; i < nodes.length; i++) {
+
+        // Using first 10 floats as a key, that's good enough don't @ me bro
+        m.set(JSON.stringify(nodes[i].embedding.slice(0, 10)), i);
+    }
+    return m;
 }

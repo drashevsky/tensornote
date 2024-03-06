@@ -18,8 +18,8 @@ export class BlockStore extends Map<number, Block> {
         return this;
     }
 
-    // Not sure how robust this will be, relies on embedding model not changing.
-    // Seems to work for now.
+    // Relies on first 10 floats of embedding as basis for hash. Not sure how robust this will be, 
+    // relies on embedding model not changing. Seems to work for now.
     getByEmbedding(embedding: number[]): Block | undefined {
         let hash = this._embeddingKeys.get(JSON.stringify(embedding.slice(0, 10)));
         if (!hash) return undefined;
