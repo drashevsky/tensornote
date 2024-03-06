@@ -4,17 +4,22 @@
 
     export let store: BlockStore;
     export let currNode: NavTreeNode;
+
+    function sortByTimestamp(a: NavTreeNode, b: NavTreeNode) {
+        let e1 = store.getByEmbedding(a.embedding) , e2 = store.getByEmbedding(b.embedding);
+        return (e1 && e2) ? e1.timestamp - e2.timestamp : 0;
+    }
 </script>
 
 <div class="w-full">
     {#if currNode.children.length > 0 && currNode.embedding.length == 0}
-        {#each currNode.children as child}
+        {#each currNode.children.sort(sortByTimestamp) as child}
             <svelte:self {store} currNode={child}/>
         {/each}
     {:else if currNode.children.length > 0}
         <div class="w-full h-100">Cluster</div>
         <div class="w-full pt-1 pl-4">
-            {#each currNode.children as child}
+            {#each currNode.children.sort(sortByTimestamp) as child}
                 <svelte:self {store} currNode={child}/>
             {/each}
         </div>
