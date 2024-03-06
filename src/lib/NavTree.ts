@@ -68,7 +68,7 @@ export class NavTree {
             // as children if they exist
             for (let i = 0; records.length > 0; i++) {
                 let embedding = records.splice(0, embeddings[0].length);
-                let prevNodeIdx = prevInternalNodesMap.get(JSON.stringify(embedding.slice(0, 10))); 
+                let prevNodeIdx = prevInternalNodesMap.get(key(embedding));
                 let child = prevNodeIdx ? prevInternalNodes[prevNodeIdx] : {embedding, children: []};
                 if (targets[i] > -1) internalNodes[targets[i]].children.push(child);
             }
@@ -121,9 +121,16 @@ function arrayToMatrix(arr: number[], row_length: number) {
 function arrayToMap(nodes: NavTreeNode[]) {
     let m = new Map<string, number>();
     for (let i = 0; i < nodes.length; i++) {
-
-        // Using first 10 floats as a key, that's good enough don't @ me bro
-        m.set(JSON.stringify(nodes[i].embedding.slice(0, 10)), i);
+        m.set(key(nodes[i].embedding), i);
     }
     return m;
+}
+
+// Takes embedding vector and turns it into a string key. As the key it 
+// uses first 10 floats of embedding, that's good enough don't @ me bro
+function key(embedding: number[]) {
+    if (embedding.length < 10) {
+        throw Error("Embedding too small!");
+    }
+    return JSON.stringify(embedding.slice(0, 10));
 }
