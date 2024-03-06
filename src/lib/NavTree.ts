@@ -69,9 +69,14 @@ export class NavTree {
             // as children if they exist
             for (let i = 0; records.length > 0; i++) {
                 let embedding = records.splice(0, embeddings[0].length);
-                let child = prevInternalNodesMap.get(JSON.stringify(embedding.slice(0, 10))) || 
+                let embedding_key = JSON.stringify(embedding.slice(0, 10));
+                let child = prevInternalNodesMap.get(embedding_key) || 
                             {embedding, children: []};
-                if (targets[i] > -1) internalNodes[targets[i]].children.push(child);
+
+                // Child not a dbscan noise pt or existing internal node
+                // (in the case of single point clusters)
+                if (targets[i] > -1 && !internalNodesMap.has(embedding_key))
+                    internalNodes[targets[i]].children.push(child);
             }
 
             // Setup centroids to be clustered, and make them next round's children
