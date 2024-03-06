@@ -45,6 +45,7 @@ export class NavTree {
         // as child nodes of the next round's clusters
  
         let prevInternalNodes : NavTreeNode[] = [];
+        let prevInternalNodesMap = new Map<string, NavTreeNode>();
         while (embeddings.length > ROOT_CHILDREN_MAX) {
 
             // Cluster embeddings
@@ -57,16 +58,12 @@ export class NavTree {
              // Create NavTree internal nodes for centroids
             let centroidsMatrix = arrayToMatrix(centroids, embeddings[0].length);
             let internalNodes : NavTreeNode[] = [];
+            let internalNodesMap = new Map<string, NavTreeNode>();
             for (let i = 0; i < centroidsMatrix.length; i++) {
-                internalNodes.push({embedding: centroidsMatrix[i], children: []});
+                let node = {embedding: centroidsMatrix[i], children: []};
+                internalNodes.push(node)
+                internalNodesMap.set(JSON.stringify(node.embedding.slice(0, 10)), node);    // Using first 10 floats as a key, that's good enough don't @ me bro
             }
-
-            // Make a temp map of prevInternalNodes if they exist
-            let prevInternalNodesMap = new Map<string, NavTreeNode>();
-            prevInternalNodes.forEach((node) => {
-                // Using first 10 floats as a key, that's good enough don't @ me bro
-                prevInternalNodesMap.set(JSON.stringify(node.embedding.slice(0, 10)), node)
-            });
 
             // Assign children to internal nodes, use previous run's internal nodes 
             // as children if they exist
@@ -80,6 +77,7 @@ export class NavTree {
             // Setup centroids to be clustered, and make them next round's children
             embeddings = centroidsMatrix;
             prevInternalNodes = internalNodes;
+            prevInternalNodesMap = internalNodesMap;
         }
 
         this._root.children = prevInternalNodes;
