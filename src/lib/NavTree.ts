@@ -26,8 +26,6 @@ export class NavTree {
     // Take list of embeddings, cluster them, and rebuild the navigation tree
     public async buildTree(embeddings: number[][]) {
 
-        // Known bug: duplicate centroids break the algorithm
-
         // Cannot cluster 0 elements
         if (embeddings.length == 0) {
             return;
@@ -60,8 +58,17 @@ export class NavTree {
             let internalNodes : NavTreeNode[] = [];
             let internalNodesMap = new Map<string, number>();
             for (let i = 0; i < centroidsMatrix.length; i++) {
-                internalNodes.push({embedding: centroidsMatrix[i], children: []});
-                internalNodesMap.set(key(centroidsMatrix[i]), i);
+                if (!internalNodesMap.has(key(centroidsMatrix[i]))) {       // normal centroid
+                    internalNodes.push({embedding: centroidsMatrix[i], children: []});
+                    internalNodesMap.set(key(centroidsMatrix[i]), i);
+                } else {                                                    // duplicate centroid
+                    targets = targets.map((cluster) => {
+                        if (cluster > i) return cluster - 1;
+                        if (cluster == i) return internalNodesMap.get(key(centroidsMatrix[i])) || -1;
+                        /* if (cluster < i) */ return cluster;
+                    });
+                    centroidsMatrix.splice(i, 1);
+                }
             }
 
             // Assign children to internal nodes, use previous run's internal nodes 
