@@ -68,6 +68,7 @@ export class NavTree {
                         /* if (cluster < i) */ return cluster;
                     });
                     centroidsMatrix.splice(i, 1);
+                    i--;
                 }
             }
 
