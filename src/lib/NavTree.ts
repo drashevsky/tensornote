@@ -95,6 +95,23 @@ export class NavTree {
     }
 }  
 
+// Given two vectors, return the cosine similarity between them
+export function csim(vec1: number[], vec2: number[]) {
+
+    // Zip and sum helpers
+    const zip = (vec1: number[], vec2: number[]) => vec1.map((k, i) => [k, vec2[i]]);
+    const sum = (vec: number[]) => vec.reduce((acc, val) => acc + val, 0);
+    
+    // Get dot product and magnitudes
+    let dot_product = zip(vec1, vec2).reduce((acc, tuple, i) => acc + (tuple[0] * tuple[1]), 0);
+    let mag_vec1 = Math.sqrt(sum(vec1.map(k => k * k)));
+    let mag_vec2 = Math.sqrt(sum(vec2.map(k => k * k)));
+
+    // Return cosine theta
+    if (mag_vec1 == 0 || mag_vec2 == 0) return 0;
+    return dot_product / (mag_vec1 * mag_vec2);
+}
+
 // Given a list of embeddings, returns flattened 2d matrices of centroids and original 
 // embeddings, as well as an array of cluster assignments using kmeans
 async function kmeans_cluster(embeddings: number[][]): Promise<[number[], number[], number[]]> {
