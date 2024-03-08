@@ -10,7 +10,7 @@
     let adapter : Worker;
     let store : BlockStore = new BlockStore();
     let tree : NavTree = new NavTree();
-    let embedding : number[] = [];
+    let currEmbedding : number[] = [];
     let inputEvents : CustomEvent[] = [];
 
     onMount(async () => {
@@ -29,13 +29,13 @@
             console.log("Confirmed worker creation.");
 
         } else if (msg.data.type == "embed") {
-            embedding = msg.data.value;
+            currEmbedding = msg.data.value;
 
             let e = inputEvents.shift();
             if (e !== undefined && e.detail.submit && !store.has(hashCode(e.detail.text))) {
                 store.set(hashCode(e.detail.text), {
                     text: e.detail.text,
-                    vec: embedding,
+                    vec: currEmbedding,
                     timestamp: Date.now()
                 });
                 store = store;  
@@ -45,7 +45,7 @@
 </script>
 
 <NavBar />
-<Notes {store} {tree}/>
+<Notes {store} {tree} {currEmbedding}/>
 <InputBar on:inputbarupdate={(event) => {
     adapter.postMessage({type: "embed", value: event.detail.text});
     inputEvents.push(event);

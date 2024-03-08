@@ -5,6 +5,7 @@
 
     export let store : BlockStore;
     export let tree : NavTree;
+    export let currEmbedding: number[];
 
     async function updateNotes() {
 		let embeddings: number[][] = Array.from(store.values()).map(block => block.vec);
@@ -18,5 +19,5 @@
 </script>
 
 <div class="w-full h-[75%] break-words overflow-scroll overflow-x-hidden p-3 border border-black">
-    <NestedListNode {store} currNode={tree.root}></NestedListNode>
+    <NestedListNode {store} currNode={tree.root} {currEmbedding}></NestedListNode>
 </div>

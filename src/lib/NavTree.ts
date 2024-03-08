@@ -1,8 +1,8 @@
 import { invoke } from '@tauri-apps/api/tauri'
 
-let BATCH_SIZE = 128;           //https://ai.stackexchange.com/questions/8560/how-do-i-choose-the-optimal-batch-size
-let ROOT_CHILDREN_MAX = 7;      //https://www.crossrivertherapy.com/memory-capacity-of-human-brain
-let DBSCAN_MIN_CLUSTER_PTS = 4;
+const BATCH_SIZE = 128;             //https://ai.stackexchange.com/questions/8560/how-do-i-choose-the-optimal-batch-size
+const ROOT_CHILDREN_MAX = 7;        //https://www.crossrivertherapy.com/memory-capacity-of-human-brain
+const DBSCAN_MIN_CLUSTER_PTS = 4;
 
 export interface NavTreeNode {
     embedding: number[],
