@@ -105,7 +105,7 @@ async function kmeans_cluster(embeddings: number[][]): Promise<[number[], number
         embeddings_cnt, 
         embeddings_dims,
         batch_size: (embeddings_cnt < BATCH_SIZE) ? embeddings_cnt : BATCH_SIZE,
-        n_clusters: Math.ceil(Math.sqrt(embeddings_cnt / 2))
+        n_clusters: Math.ceil(Math.sqrt(embeddings_cnt))
     });
 }
 
