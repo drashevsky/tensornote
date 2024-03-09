@@ -3,17 +3,29 @@
     import { NavTree, type NavTreeNode } from "$lib/NavTree";
     import NestedListNode from "./NestedListNode.svelte";
 
+    const INSERT_THRESH = 5;
+
     export let store : BlockStore;
     export let tree : NavTree;
     export let currEmbedding: number[];
+
     let cursorNode : NavTreeNode;
+    let insertCount = 0;
 
     async function updateNotes() {
-		let embeddings: number[][] = Array.from(store.values()).map(block => block.vec);
-        // let timestamp = Date.now();
-        await tree.buildTree(embeddings);
-        tree = tree;
-        // console.log("Nested list updated in", Date.now() - timestamp, "ms");
+        if (currEmbedding.length == 0 || currEmbedding.length == 1 || store.size == 0)
+            return;
+
+        if (insertCount < INSERT_THRESH) {
+            tree.insert(currEmbedding, tree.root);
+            tree = tree;
+            insertCount += 1;
+        } else {
+            let embeddings: number[][] = Array.from(store.values()).map(block => block.vec);
+            await tree.buildTree(embeddings);
+            tree = tree;
+            insertCount = 0;
+        }
 	}
 
     $: store && updateNotes();

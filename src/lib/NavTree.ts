@@ -98,8 +98,9 @@ export class NavTree {
     // Search the tree for the most similar cluster to the given embedding, starting from
     // the cluster passed in as a parameter, and append a node to that cluster
     public insert(embedding: number[], currNode: NavTreeNode) {
-        
-        if (currNode.children.length == 0)  // No blocks!
+        if (embedding.length == 0 || embedding.length == 1)         // Can't insert empty or dud
+            return;
+        if (currNode.children.length == 0 && currNode.embedding.length > 0)  // No blocks!
             return;
 
         let closest_node_idx = -1;
