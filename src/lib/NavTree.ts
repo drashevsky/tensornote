@@ -128,6 +128,10 @@ export class NavTree {
     // the node passed in as a parameter
     public searchTree(embedding: number[], currNode: NavTreeNode): NavTreeNode {
 
+        // Root node with no children: return a dud node that isn't a part of the tree
+        if (currNode.children.length == 0 && currNode.embedding.length == 0)
+            return {embedding: [-1], children: []}
+
         // Base case: reached block
         if (currNode.children.length == 0) 
             return currNode;
