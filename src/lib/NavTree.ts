@@ -3,6 +3,7 @@ import { invoke } from '@tauri-apps/api/tauri'
 const BATCH_SIZE = 128;             //https://ai.stackexchange.com/questions/8560/how-do-i-choose-the-optimal-batch-size
 const ROOT_CHILDREN_MAX = 7;        //https://www.crossrivertherapy.com/memory-capacity-of-human-brain
 const DBSCAN_MIN_CLUSTER_PTS = 4;
+const ROOT_NODE_SIM_THRESHOLD = 0.65;
 
 export interface NavTreeNode {
     embedding: number[],
@@ -92,6 +93,59 @@ export class NavTree {
         }
 
         this._root.children = prevInternalNodes;
+    }
+
+    // Search the tree for the most similar cluster to the given embedding, starting from
+    // the cluster passed in as a parameter, and append a node to that cluster
+    public insert(embedding: number[], currNode: NavTreeNode) {
+        
+        if (currNode.children.length == 0)  // No blocks!
+            return;
+
+        let closest_node_idx = -1;
+        let closest_sim = -1;
+        let parent_sim = csim(embedding, currNode.embedding);
+        if (parent_sim == 0) parent_sim = ROOT_NODE_SIM_THRESHOLD;
+
+        for (let i = 0; i < currNode.children.length; i++) {
+            if (currNode.children[i].children.length == 0) continue;    // skip blocks
+
+            let sim = csim(embedding, currNode.children[i].embedding);
+            if (sim > closest_sim) {
+                closest_node_idx = i;
+                closest_sim = sim;
+            }
+        }
+
+        if (closest_sim > parent_sim) {
+            this.insert(embedding, currNode.children[closest_node_idx]);
+        } else {
+            currNode.children.push({embedding, children: []})
+        }
+    }
+
+    // Search the tree for the most similar node to the given embedding, starting from
+    // the node passed in as a parameter
+    public searchTree(embedding: number[], currNode: NavTreeNode): NavTreeNode {
+
+        // Base case: reached block
+        if (currNode.children.length == 0) 
+            return currNode;
+
+        let closest_node = currNode.children[0];
+        let closest_sim = csim(embedding, closest_node.embedding);
+        let parent_sim = csim(embedding, currNode.embedding);
+        if (parent_sim == 0) parent_sim = ROOT_NODE_SIM_THRESHOLD;
+
+        for (let i = 1; i < currNode.children.length; i++) {
+            let sim = csim(embedding, currNode.children[i].embedding);;
+            if (sim > closest_sim) {
+                closest_node = currNode.children[i];
+                closest_sim = sim;
+            }
+        }
+
+        return closest_sim > parent_sim ? this.searchTree(embedding, closest_node) : currNode;
     }
 }  
 
