@@ -23,12 +23,14 @@
         // }
     }
 
-    function handleSubmit(e : KeyboardEvent) {
+    function handleKey(e : KeyboardEvent) {
         if (e.key == "Enter" && text != "") {
             e.preventDefault();
             clearTimeout(debounce);
             dispatch('inputbarupdate', {text, submit: true});
             text = "";
+        } else if (e.key == "Escape") {
+            (e.target as HTMLElement).blur();
         }
     }
 
@@ -38,5 +40,5 @@
 <div class="fixed bottom-0 w-full h-[20%]">
     <textarea class="w-full h-full" placeholder="Type or search for a note." 
         bind:value={text}
-        on:keydown={handleSubmit}/>
+        on:keydown={handleKey}/>
 </div>

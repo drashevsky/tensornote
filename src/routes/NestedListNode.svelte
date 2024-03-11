@@ -21,6 +21,12 @@
         return (1 - csim(parent, a.embedding)) -                            // 2 clusters
                (1 - csim(parent, b.embedding));   
     }
+
+    function handleKey(e: KeyboardEvent) {
+        if (e.key == "Escape") {
+            (e.target as HTMLElement).blur();
+        }
+    }
 </script>
 
 <div class="w-full {(cursorNode == currNode) ? CURSOR_ACTIVE : ""}">
@@ -36,7 +42,9 @@
             {/each}
         </div>
     {:else if currNode.embedding.length > 0}
-        <div class="w-full h-100 border-black border-b">  
+        <div id="{cursorNode == currNode ? "cursor" : ""}" 
+             class="w-full h-100 border-black border-b" 
+             role="button" tabindex="0" on:keydown={handleKey}>  
             <p>{store.getByEmbedding(currNode.embedding)?.text}</p>
         </div>
     {/if}
