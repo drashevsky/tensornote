@@ -12,6 +12,7 @@
     let tree : NavTree = new NavTree();
     let currEmbedding : number[] = [];
     let inputEvents : CustomEvent[] = [];
+    let inputBarText: string = '';
 
     onMount(async () => {
         const w = await import('$lib/embeddings/EmbeddingAdapterWorker.ts?worker');
@@ -42,11 +43,23 @@
             }
         }
     }
+
+    function removeNode(e: CustomEvent) {
+        let block = store.getByEmbedding(e.detail.node.embedding);
+        if (block) {
+            tree.delete(e.detail.node.embedding, tree.root);
+            tree = tree;
+            store.delete(hashCode(block.text));
+            store = store;
+            inputBarText = block.text;
+            document.getElementById("input-bar")?.focus();
+        }
+    }
 </script>
 
 <NavBar />
-<Notes {store} {tree} {currEmbedding}/>
-<InputBar on:inputbarupdate={(event) => {
+<Notes {store} {tree} {currEmbedding} on:removenode={removeNode}/>
+<InputBar text={inputBarText} on:inputbarupdate={(event) => {
     adapter.postMessage({type: "embed", value: event.detail.text});
     inputEvents.push(event);
 }}/>

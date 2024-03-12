@@ -152,6 +152,37 @@ export class NavTree {
 
         return closest_sim > parent_sim ? this.searchTree(embedding, closest_node) : currNode;
     }
+
+    // Search the tree for the block node whose embedding is passed in starting from currNode.
+    // Delete it if found.
+    public delete(target: number[], currNode: NavTreeNode): boolean {
+        if (currNode.children.length == 0 && currNode.embedding.length == 0)    // empty root
+            return false;
+
+        for (let i = 0; i < currNode.children.length; i++) {
+            
+            // Is block
+            if (currNode.children[i].children.length == 0) {
+
+                // Found node
+                if (key(currNode.children[i].embedding) == key(target)) {
+                    currNode.children.splice(i, 1);
+                    return true;
+                }
+                continue;
+            
+            // Is cluster
+            } else {
+                let res = this.delete(target, currNode.children[i]);
+                if (res && currNode.children[i].children.length == 0) {     // Delete empty cluster
+                    currNode.children.splice(i, 1);
+                    return res;
+                }
+            }
+        }
+
+        return false;
+    }
 }  
 
 // Given two vectors, return the cosine similarity between them

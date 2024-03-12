@@ -18,6 +18,22 @@ export class BlockStore extends Map<number, Block> {
         return this;
     }
 
+    delete(n: number): boolean {
+        let block = super.get(n);
+        if (!block) return false;
+
+        if (super.delete(n)) {
+            for (let key in this._embeddingKeys.keys) {
+                if (key == JSON.stringify(block.vec.slice(0, 10))) {
+                    this._embeddingKeys.delete(key);
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     // Relies on first 10 floats of embedding as basis for hash. Not sure how robust this will be, 
     // relies on embedding model not changing. Seems to work for now.
     getByEmbedding(embedding: number[]): Block | undefined {
