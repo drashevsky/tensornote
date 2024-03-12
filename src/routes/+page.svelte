@@ -7,7 +7,10 @@
     import InputBar from './InputBar.svelte';
     import { NavTree, type NavTreeNode } from "$lib/NavTree";
 
+    const MODEL = "TaylorAI/bge-micro-v2";
+
     let adapter : Worker;
+    let tokenLimit: number = 0;
     let store : BlockStore = new BlockStore();
     let tree : NavTree = new NavTree();
     let currEmbedding : number[] = [];
@@ -17,7 +20,7 @@
     onMount(async () => {
         const w = await import('$lib/embeddings/EmbeddingAdapterWorker.ts?worker');
         adapter = new w.default();
-        adapter.postMessage({type: "init", value: "TaylorAI/bge-micro-v2"});
+        adapter.postMessage({type: "init", value: MODEL});
         adapter.addEventListener("message", handleAdapter);
     });
 
@@ -26,7 +29,8 @@
     });
 
     function handleAdapter(msg : MessageEvent) {
-        if (msg.data.type == "init" && msg.data.value == true) {
+        if (msg.data.type == "init" && msg.data.value) {
+            tokenLimit = msg.data.value;
             console.log("Confirmed worker creation.");
 
         } else if (msg.data.type == "embed") {
@@ -59,7 +63,7 @@
 
 <NavBar />
 <Notes {store} {tree} {currEmbedding} on:removenode={removeNode}/>
-<InputBar text={inputBarText} on:inputbarupdate={(event) => {
+<InputBar text={inputBarText} {tokenLimit} on:inputbarupdate={(event) => {
     adapter.postMessage({type: "embed", value: event.detail.text});
     inputEvents.push(event);
 }}/>

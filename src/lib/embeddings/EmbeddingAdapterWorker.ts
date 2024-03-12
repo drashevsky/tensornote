@@ -6,13 +6,13 @@ let adapter : LocalEmbeddingAdapter;
 self.onmessage = async function(msg) {
 
     // Params: type: "init", value: model name from models.json
-    // Returns: type: "init", value: true
+    // Returns: type: "init", value: token limit
     if (msg.data.type == "init") {
         console.log("Initializing embeddings model...");
         adapter = await LocalEmbeddingAdapter.create(msg.data.value);
         self.postMessage({
             type: "init",
-            value: true
+            value: adapter.max_tokens
         });
         console.log(adapter.config.model_name + " ready.");
 
