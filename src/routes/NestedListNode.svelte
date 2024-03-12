@@ -51,12 +51,12 @@
         </div>
     {:else if currNode.embedding.length > 0}
         <div id="{cursorNode == currNode ? "cursor" : ""}" 
-             class="w-full h-100 border-black border-b" 
+             class="w-full h-100 border-black border-b whitespace-pre-wrap" 
              role="button" 
              tabindex="0" 
              on:keydown={handleKey}
              on:dblclick={handleDblClick}>  
-            <p>{store.getByEmbedding(currNode.embedding)?.text}</p>
+            {store.getByEmbedding(currNode.embedding)?.text}
         </div>
     {/if}
 </div>
