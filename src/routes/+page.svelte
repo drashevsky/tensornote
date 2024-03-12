@@ -18,12 +18,6 @@
         adapter = new w.default();
         adapter.postMessage({type: "init", value: "TaylorAI/bge-micro-v2"});
         adapter.addEventListener("message", handleAdapter);
-        document.onkeydown = (e: KeyboardEvent) => {
-            if (document.activeElement == document.body && e.key == "Tab") {
-                e.preventDefault();
-                document.getElementById("cursor")?.focus();
-            } 
-        }
     });
 
     onDestroy(() => {
