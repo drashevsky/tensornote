@@ -27,8 +27,11 @@
         } else if (e.key == "Escape") {
             (e.target as HTMLElement).blur();
         } else if (e.key == "Tab") {
-            e.preventDefault();
-            document.getElementById("cursor")?.focus();
+            let el = document.getElementById("cursor");
+            if (el) {
+                e.preventDefault();
+                el.focus();
+            }
         }
     }
 
