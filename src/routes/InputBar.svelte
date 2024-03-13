@@ -19,7 +19,7 @@
     }
 
     function handleKey(e : KeyboardEvent) {
-        if (e.key == "Enter" && !e.shiftKey && text != "") {
+        if (e.key == "Enter" && !e.shiftKey && text.trim() != "") {
             e.preventDefault();
             clearTimeout(debounce);
             dispatch('inputbarupdate', {text, submit: true});
