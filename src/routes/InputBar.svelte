@@ -4,6 +4,7 @@
     export let text: string;
     export let tokenLimit: number;
     const dispatch = createEventDispatcher();
+
     let debounce : NodeJS.Timeout = setTimeout(() => {}, 0); 
     let word_count = 0;
 
