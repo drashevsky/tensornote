@@ -1,11 +1,10 @@
 <script lang="ts">
-    import { onMount, onDestroy } from "svelte";
     import { BlockStore, hashCode } from "$lib/BlockStore";
-
+    import { NavTree } from "$lib/NavTree";
+    import { onDestroy, onMount } from "svelte";
+    import InputBar from './InputBar.svelte';
     import NavBar from "./NavBar.svelte";
     import Notes from "./Notes.svelte";
-    import InputBar from './InputBar.svelte';
-    import { NavTree, type NavTreeNode } from "$lib/NavTree";
 
     const MODEL = "TaylorAI/bge-micro-v2";
 

@@ -1,6 +1,7 @@
 <script lang="ts">
     import { BlockStore } from "$lib/BlockStore";
     import { NavTree, type NavTreeNode } from "$lib/NavTree";
+    import { tick } from "svelte";
     import NestedListNode from "./NestedListNode.svelte";
 
     const INSERT_THRESH = 5;
@@ -12,6 +13,7 @@
     let cursorNode : NavTreeNode;
     let old_store_size = 0;
     let insertCount = 0;
+    let notes_el: HTMLElement;
 
     async function updateNotes() {
         if (currEmbedding.length == 0 || currEmbedding.length == 1)
@@ -31,10 +33,22 @@
         old_store_size = store.size;
 	}
 
+    async function updateCursor() {
+        cursorNode = tree.searchTree(currEmbedding, tree.root);
+        await tick();
+
+        let el = document.getElementById("cursor");
+        let el_box = el?.getBoundingClientRect();
+        let notes_box = notes_el.getBoundingClientRect();
+        if (el_box && (el_box.top < notes_box.top || el_box.bottom > notes_box.bottom))
+            document.getElementById("cursor")?.scrollIntoView({block: "center"});
+    }
+
     $: store && updateNotes();
-    $: cursorNode = tree.searchTree(currEmbedding, tree.root);
+    $: currEmbedding && updateCursor();
 </script>
 
-<div class="w-full h-[75%] break-words overflow-scroll overflow-x-hidden p-3 border border-black">
+<div class="w-full h-[75%] break-words overflow-scroll overflow-x-hidden p-3 border border-black"
+     bind:this={notes_el}>
     <NestedListNode {store} currNode={tree.root} {cursorNode} on:removenode/>
 </div>
