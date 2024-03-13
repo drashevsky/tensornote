@@ -19,7 +19,7 @@
     }
 
     function handleKey(e : KeyboardEvent) {
-        if (e.key == "Enter" && text != "") {
+        if (e.key == "Enter" && !e.shiftKey && text != "") {
             e.preventDefault();
             clearTimeout(debounce);
             dispatch('inputbarupdate', {text, submit: true});
@@ -38,12 +38,12 @@
 
 <div class="fixed bottom-0 w-full h-[20%]">
     <textarea id="input-bar" class="w-full h-full resize-none" 
-        placeholder="Type or search for a note." 
+        placeholder="Space to type or search. Enter to submit. Shift + enter for newline." 
         bind:value={text}
         on:keydown={handleKey}/>
-    <div class="absolute bottom-0 right-1 {word_count > tokenLimit ? 
+    <div class="absolute bottom-0 right-5 {word_count > tokenLimit ? 
         "text-red-600" : 
         "text-black/75"}">
-        {word_count} / {tokenLimit} {word_count > tokenLimit ? "Cursor accuracy loss" : ""} 
+        {word_count} / {tokenLimit} {word_count > tokenLimit ? "Cursor accuracy reduced" : ""} 
     </div>
 </div>

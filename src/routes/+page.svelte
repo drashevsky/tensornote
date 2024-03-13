@@ -22,6 +22,11 @@
         adapter = new w.default();
         adapter.postMessage({type: "init", value: MODEL});
         adapter.addEventListener("message", handleAdapter);
+        document.onkeydown = (e) => {
+            if (document.activeElement == document.body && e.key == " ") {
+                document.getElementById("input-bar")?.focus();
+            }
+        }
     });
 
     onDestroy(() => {
