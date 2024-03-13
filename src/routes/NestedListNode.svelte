@@ -37,26 +37,31 @@
     }
 </script>
 
-<div class="w-full {(cursorNode == currNode) ? CURSOR_ACTIVE : ""}">
+<div class="w-full pt-1 {(cursorNode == currNode) ? CURSOR_ACTIVE : ""}">
     {#if currNode.children.length > 0 && currNode.embedding.length == 0}
         {#each [...currNode.children].sort(sortNodes) as child}
             <svelte:self {store} currNode={child} {cursorNode} on:removenode/>
         {/each}
     {:else if currNode.children.length > 0}
         <div class="w-full h-100">Cluster</div>
-        <div class="w-full pt-1 pl-4">
+        <div class="w-full pt-1 pl-10">
             {#each [...currNode.children].sort(sortNodes) as child}
                 <svelte:self {store} currNode={child} {cursorNode} on:removenode/>
             {/each}
         </div>
     {:else if currNode.embedding.length > 0}
-        <div id="{cursorNode == currNode ? "cursor" : ""}" 
-             class="w-full h-100 border-black border-b whitespace-pre-wrap" 
-             role="button" 
-             tabindex="0" 
-             on:keydown={handleKey}
-             on:dblclick={handleDblClick}>  
-            {store.getByEmbedding(currNode.embedding)?.text}
+        <div class="flex items-start">
+            <svg viewBox="0 0 20 20" class="w-5 h-5 mt-1 mr-2 fill-slate-700">
+                <circle cx="10" cy="10" r="3.5"></circle>
+            </svg>
+            <div id="{cursorNode == currNode ? "cursor" : ""}" 
+                class="w-full h-100 whitespace-pre-wrap" 
+                role="button" 
+                tabindex="0" 
+                on:keydown={handleKey}
+                on:dblclick={handleDblClick}>  
+                {store.getByEmbedding(currNode.embedding)?.text}
+            </div>
         </div>
     {/if}
 </div>
