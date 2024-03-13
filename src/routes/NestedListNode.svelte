@@ -53,11 +53,11 @@
             <!-- svelte-ignore a11y-click-events-have-key-events -->
             <!-- svelte-ignore a11y-no-static-element-interactions-->
             <svg viewBox="0 0 20 20" 
-                 class="w-5 h-5 mt-1 fill-gray-300 hover:fill-slate-700 {closed || "rotate-90"}"
+                 class="w-5 h-5 mt-1 shrink-0 fill-gray-300 hover:fill-slate-700 {closed || "rotate-90"}"
                  on:click={() => {closed = !closed}}>
                 <path d="{SVG_ARROW}"></path>
             </svg>
-            <svg viewBox="0 0 20 20" class="w-5 h-5 mt-1 mr-2 fill-slate-700">
+            <svg viewBox="0 0 20 20" class="w-5 h-5 mt-1 mr-2 shrink-0 fill-slate-700">
                 <circle cx="10" cy="10" r="3.5"></circle>
             </svg>
             <div class="h-full">Cluster</div>
@@ -71,7 +71,7 @@
         {/if}
     {:else if currNode.embedding.length > 0}
         <div class="flex items-start">
-            <svg viewBox="0 0 20 20" class="w-5 h-5 mt-1 mr-2 fill-slate-700">
+            <svg viewBox="0 0 20 20" class="w-5 h-5 mt-1 mr-2 shrink-0 fill-slate-700">
                 <circle cx="10" cy="10" r="3.5"></circle>
             </svg>
             <div id="{cursorNode == currNode ? "cursor" : ""}" 
