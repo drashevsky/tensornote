@@ -10,9 +10,9 @@
     export let tree : NavTree;
     export let currEmbedding: number[];
 
-    let cursorNode : NavTreeNode;
     let old_store_size = 0;
     let insertCount = 0;
+    let cursorNode : NavTreeNode;
     let notes_el: HTMLElement;
 
     async function updateNotes() {
@@ -21,14 +21,13 @@
         if (store.size > old_store_size) {
             if (insertCount < INSERT_THRESH) {
                 tree.insert(currEmbedding, tree.root);
-                tree = tree;
                 insertCount += 1;
             } else {
                 let embeddings: number[][] = Array.from(store.values()).map(block => block.vec);
                 await tree.buildTree(embeddings);
-                tree = tree;
                 insertCount = 0;
             }
+            tree = tree;
         }
         old_store_size = store.size;
 	}
