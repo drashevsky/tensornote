@@ -1,7 +1,8 @@
 export interface Block {
     text: string, 
     vec: number[], 
-    timestamp: number
+    timestamp: number,
+    keywords: [string, number][]    // [keyword, term frequency]
 }
 
 export class BlockStore extends Map<number, Block> {

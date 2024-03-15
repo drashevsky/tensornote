@@ -2,6 +2,7 @@ import { invoke } from '@tauri-apps/api/tauri'
 
 const BATCH_SIZE = 128;             //https://ai.stackexchange.com/questions/8560/how-do-i-choose-the-optimal-batch-size
 const ROOT_CHILDREN_MAX = 7;        //https://www.crossrivertherapy.com/memory-capacity-of-human-brain
+const KMEANS_NCLUSTER_COEFF = 0.5;
 const DBSCAN_MIN_CLUSTER_PTS = 4;
 const ROOT_NODE_SIM_THRESHOLD = 0.65;
 
@@ -183,6 +184,48 @@ export class NavTree {
 
         return false;
     }
+
+    // Given a start node, go through navtree and associate each cluster node's embedding
+    // to its descendant blocks' embeddings. Return mappings as an object.
+    public descendantMap(currNode: NavTreeNode): {[key: string]: string[]} {
+        let mapping: {[key: string]: string[]}  = {};
+
+        // empty root
+        if (currNode.children.length == 0 && currNode.embedding.length == 0)
+            return mapping;
+
+        // root with children: run descendantmap on all clusters
+        if (currNode.embedding.length == 0) {
+            for (let i = 0; i < currNode.children.length; i++) {
+                if (currNode.children[i].children.length != 0)
+                    mapping = {...mapping, ...this.descendantMap(currNode.children[i])};
+            }
+            return mapping;
+        }
+
+        // block or empty cluster
+        if (currNode.children.length == 0)
+            return mapping;
+
+        // cluster with children
+        let embeddings: string[] = [];
+        for (let i = 0; i < currNode.children.length; i++) {
+            let childKey = key(currNode.children[i].embedding);
+
+            // Is block
+            if (currNode.children[i].children.length == 0) {
+                embeddings.push(childKey);
+                
+            // Is cluster
+            } else {
+                mapping = {...mapping, ...this.descendantMap(currNode.children[i])};
+                embeddings.push(...mapping[childKey]);
+            }
+        }
+
+        mapping[key(currNode.embedding)] = embeddings;
+        return mapping;
+    }
 }  
 
 // Given two vectors, return the cosine similarity between them
@@ -212,7 +255,7 @@ async function kmeans_cluster(embeddings: number[][]): Promise<[number[], number
         embeddings_cnt, 
         embeddings_dims,
         batch_size: (embeddings_cnt < BATCH_SIZE) ? embeddings_cnt : BATCH_SIZE,
-        n_clusters: Math.ceil(Math.sqrt(embeddings_cnt / 2))
+        n_clusters: Math.ceil(Math.sqrt(embeddings_cnt * KMEANS_NCLUSTER_COEFF))
     });
 }
 

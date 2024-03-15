@@ -1,5 +1,6 @@
 <script lang="ts">
     import { BlockStore, hashCode } from "$lib/BlockStore";
+    import { getKeywords } from "$lib/Keywords";
     import { NavTree } from "$lib/NavTree";
     import { onDestroy, onMount } from "svelte";
     import InputBar from './InputBar.svelte';
@@ -45,7 +46,8 @@
                 store.set(hashCode(e.detail.text), {
                     text: e.detail.text,
                     vec: currEmbedding,
-                    timestamp: Date.now()
+                    timestamp: Date.now(),
+                    keywords: getKeywords(e.detail.text)
                 });
                 store = store;  
             }
