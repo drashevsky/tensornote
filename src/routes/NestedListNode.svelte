@@ -43,7 +43,7 @@
         }
 
         let topKeywords = getTopNKeywords(getTfIdf(freq_matrix, false), NUM_KEYWORDS).map(([a, b]) => a);
-        return topKeywords.length > 0 ? topKeywords.join(", ") : "Untitled cluster";
+        return topKeywords.length > 0 ? topKeywords.join(", ") : "Untitled sublist";
     }
 
     function handleKey(e: KeyboardEvent) {
