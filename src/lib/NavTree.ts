@@ -13,12 +13,11 @@ export interface NavTreeNode {
 
 export class NavTree {
     private _root: NavTreeNode;
+    private _clusterDescendants: {[key: string]: number[][]};
 
-    constructor(embeddings?: number[][]) {
-        this._root = {embedding: [], children: []}
-        if (embeddings) {
-            this.buildTree(embeddings);
-        }
+    constructor() {
+        this._root = {embedding: [], children: []};
+        this._clusterDescendants = {};
     }
 
     public get root() {
@@ -26,6 +25,7 @@ export class NavTree {
     }
 
     // Take list of embeddings, cluster them, and rebuild the navigation tree
+    // Also builds an internal cluster -> block descendants map
     public async buildTree(embeddings: number[][]) {
 
         // Cannot cluster 0 elements
@@ -94,6 +94,7 @@ export class NavTree {
         }
 
         this._root.children = prevInternalNodes;
+        this._clusterDescendants = this.buildDescendantsMap(this.root);
     }
 
     // Search the tree for the most similar cluster to the given embedding, starting from
@@ -186,9 +187,9 @@ export class NavTree {
     }
 
     // Given a start node, go through navtree and associate each cluster node's embedding
-    // to its descendant blocks' embeddings. Return mappings as an object.
-    public descendantMap(currNode: NavTreeNode): {[key: string]: string[]} {
-        let mapping: {[key: string]: string[]}  = {};
+    // to its descendant blocks. Return mappings as an object.
+    public buildDescendantsMap(currNode: NavTreeNode): {[key: string]: number[][]} {
+        let mapping: {[key: string]: number[][]}  = {};
 
         // empty root
         if (currNode.children.length == 0 && currNode.embedding.length == 0)
@@ -198,7 +199,7 @@ export class NavTree {
         if (currNode.embedding.length == 0) {
             for (let i = 0; i < currNode.children.length; i++) {
                 if (currNode.children[i].children.length != 0)
-                    mapping = {...mapping, ...this.descendantMap(currNode.children[i])};
+                    mapping = {...mapping, ...this.buildDescendantsMap(currNode.children[i])};
             }
             return mapping;
         }
@@ -208,23 +209,29 @@ export class NavTree {
             return mapping;
 
         // cluster with children
-        let embeddings: string[] = [];
+        let embeddings: number[][] = [];
         for (let i = 0; i < currNode.children.length; i++) {
             let childKey = key(currNode.children[i].embedding);
 
             // Is block
             if (currNode.children[i].children.length == 0) {
-                embeddings.push(childKey);
+                embeddings.push(currNode.children[i].embedding);
                 
             // Is cluster
             } else {
-                mapping = {...mapping, ...this.descendantMap(currNode.children[i])};
+                mapping = {...mapping, ...this.buildDescendantsMap(currNode.children[i])};
                 embeddings.push(...mapping[childKey]);
             }
         }
 
         mapping[key(currNode.embedding)] = embeddings;
         return mapping;
+    }
+
+    // Given a cluster node, get a list of the descendant blocks' embeddings
+    public getDescendants(node: NavTreeNode): number[][] {
+        let node_key = key(node.embedding);
+        return this._clusterDescendants[node_key] ? this._clusterDescendants[node_key] : [];
     }
 }  
 

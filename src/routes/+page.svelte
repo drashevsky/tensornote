@@ -24,6 +24,7 @@
         adapter.addEventListener("message", handleAdapter);
         document.onkeydown = (e) => {
             if (document.activeElement == document.body && e.key == " ") {
+                e.preventDefault();
                 document.getElementById("input-bar")?.focus();
             }
         }

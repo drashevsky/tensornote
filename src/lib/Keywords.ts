@@ -10,10 +10,31 @@ export function getKeywords(text: string): [string, number][] {
     return getTermFrequencies(keywords);
 }
 
+// Given a tfidf matrix, get the top n keywords of the corpus and their tfidf scores
+export function getTopNKeywords(tfidf_matrix: [string, number][][], n: number): [string, number][] {
+    let keywords: [string, number][] = [];
+
+    let search_idx = 0;
+    while (keywords.length < n) {
+        let currKeywords = tfidf_matrix.filter(arr => arr[search_idx] !== undefined)
+                                       .map(arr => arr[search_idx]);
+        
+        if (currKeywords.length > 0) {
+            keywords.push(...currKeywords.slice(0, n - keywords.length));
+            search_idx++;
+        } else {
+            break;
+        }
+    }
+
+    keywords.sort((a, b) => b[1] - a[1]);
+    return keywords;
+}
+
 // Given an array of word-term frequency pairing arrays (each array = one document), return an 
 // array of word-(term freq * inverse document freq) pairing arrays (each array = one document)
 // just_idf: return only inverse document frequencies
-function getTfIdf(freq_matrix: [string, number][][], just_idf: boolean): [string, number][][] {
+export function getTfIdf(freq_matrix: [string, number][][], just_idf: boolean): [string, number][][] {
 
     // First count the number of documents each word appears in
     let docs_per_word = new Map<string, number>();
@@ -34,6 +55,7 @@ function getTfIdf(freq_matrix: [string, number][][], just_idf: boolean): [string
             let idf = (docs_count) ? Math.log10(freq_matrix.length / docs_count) : 0;
             tfidf_arr.push([word, just_idf ? idf : freq_matrix[i][j][1] * idf]);
         }
+        tfidf_arr.sort((a, b) => b[1] - a[1]);  // I decided to sort the tfdiff scores
         tfidf_matrix.push(tfidf_arr);
     }
     return tfidf_matrix;

@@ -1,9 +1,11 @@
 <script lang="ts">
     import type { BlockStore } from "$lib/BlockStore";
+    import { getTfIdf, getTopNKeywords } from "$lib/Keywords";
     import { csim, type NavTreeNode } from "$lib/NavTree";
     import { createEventDispatcher } from 'svelte';
     import { slide } from "svelte/transition";
 
+    const NUM_KEYWORDS = 5;
     const CURSOR_ACTIVE = "border-red-400 border-b-2";
     const SVG_ARROW = `M13.75 9.56879C14.0833 9.76124 14.0833 10.2424 13.75
                        10.4348L8.5 13.4659C8.16667 13.6584 7.75 13.4178 7.75
@@ -12,6 +14,7 @@
     export let store: BlockStore;
     export let currNode: NavTreeNode;
     export let cursorNode: NavTreeNode;
+    export let descFunc: (node: NavTreeNode) => number[][];
     const dispatch = createEventDispatcher();
 
     let closed = false;
@@ -30,6 +33,19 @@
                (1 - csim(parent, b.embedding));   
     }
 
+    function getTitle() {
+        let descendants = descFunc(currNode);
+        let freq_matrix = [];
+
+        for (let i = 0; i < descendants.length; i++) {
+            let block = store.getByEmbedding(descendants[i]);
+            if (block) freq_matrix.push(block.keywords);
+        }
+
+        let topKeywords = getTopNKeywords(getTfIdf(freq_matrix, false), NUM_KEYWORDS).map(([a, b]) => a);
+        return topKeywords.length > 0 ? topKeywords.join(", ") : "Untitled cluster";
+    }
+
     function handleKey(e: KeyboardEvent) {
         if (e.key == "Escape") {
             (e.target as HTMLElement).blur();
@@ -46,7 +62,7 @@
 <div class="w-full pt-1 {(cursorNode == currNode) ? CURSOR_ACTIVE : ""}">
     {#if currNode.children.length > 0 && currNode.embedding.length == 0}
         {#each [...currNode.children].sort(sortNodes) as child}
-            <svelte:self {store} currNode={child} {cursorNode} on:removenode/>
+            <svelte:self {store} currNode={child} {cursorNode} {descFunc} on:removenode/>
         {/each}
     {:else if currNode.children.length > 0}
         <div class="w-full h-full flex items-start">
@@ -60,12 +76,12 @@
             <svg viewBox="0 0 20 20" class="w-5 h-5 mt-1 mr-2 shrink-0 fill-slate-700">
                 <circle cx="10" cy="10" r="3.5"></circle>
             </svg>
-            <div class="h-full">Cluster</div>
+            <div class="h-full font-bold italic">{getTitle()}</div>
         </div>
         {#if !closed}
             <div class="w-full pl-10" transition:slide>
                 {#each [...currNode.children].sort(sortNodes) as child}
-                    <svelte:self {store} currNode={child} {cursorNode} on:removenode/>
+                    <svelte:self {store} currNode={child} {cursorNode} {descFunc} on:removenode/>
                 {/each}
             </div>
         {/if}
