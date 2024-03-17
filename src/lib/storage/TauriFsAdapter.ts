@@ -32,7 +32,7 @@ export class TauriFsAdapter extends StorageAdapter {
 
         // Tauri FS is sooo dumb, I need this to create appdata directory
         if (!(await this._exists("dummy", { dir: this._BaseDirectory.AppData }))) {
-            fs.createDir("dummy", { dir: this._BaseDirectory.AppData, recursive: true });
+            await fs.createDir("dummy", { dir: this._BaseDirectory.AppData, recursive: true });
         }
         console.log("Loaded tauri filesystem adapter.");
     }
