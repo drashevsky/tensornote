@@ -38,8 +38,8 @@
 
         let el = document.getElementById("cursor");
         let el_box = el?.getBoundingClientRect();
-        let notes_box = notes_el.getBoundingClientRect();
-        if (el_box && (el_box.top < notes_box.top || el_box.bottom > notes_box.bottom))
+        let notes_box = notes_el?.getBoundingClientRect();
+        if (el_box && notes_box && (el_box.top < notes_box.top || el_box.bottom > notes_box.bottom))
             document.getElementById("cursor")?.scrollIntoView({block: "center"});
     }
 
