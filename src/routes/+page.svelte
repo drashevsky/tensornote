@@ -8,20 +8,42 @@
     import Notes from "./Notes.svelte";
 
     const MODEL = "TaylorAI/bge-micro-v2";
+    const STORE_JSON_FILE = "store-" + MODEL.replace("/", "-") + ".json";
+    const STORE_WEBSTORE_KEY = "blockstore";
 
     let adapter : Worker;
     let tokenLimit: number = 0;
-    let store : BlockStore = new BlockStore();
+    let store : BlockStore;
     let tree : NavTree = new NavTree();
     let currEmbedding : number[] = [];
     let inputEvents : CustomEvent[] = [];
     let inputBarText: string = '';
 
     onMount(async () => {
+
+        // Setup blockstore
+        let storageApi = window.__TAURI__ ? 
+            (await import("$lib/storage/TauriFsAdapter")).TauriFsAdapter : 
+            (await import("$lib/storage/WebStorageAdapter")).WebStorageAdapter;
+        let storageName = window.__TAURI__ ?  STORE_JSON_FILE : STORE_WEBSTORE_KEY;
+        let storageAdapter = await storageApi.create(storageName);
+        store = new BlockStore(storageAdapter);
+        await store.init();
+
+        // Build navtree for 1st time
+        if (store.size > 0) {
+            let embeddings: number[][] = Array.from(store.values()).map(block => block.vec);
+            await tree.buildTree(embeddings);
+            tree = tree;
+        }
+
+        // Setup embedding adapter
         const w = await import('$lib/embeddings/EmbeddingAdapterWorker.ts?worker');
         adapter = new w.default();
         adapter.postMessage({type: "init", value: MODEL});
         adapter.addEventListener("message", handleAdapter);
+
+        // Add keyboard shortcut to input bar
         document.onkeydown = (e) => {
             if (document.activeElement == document.body && e.key == " ") {
                 e.preventDefault();
@@ -34,7 +56,7 @@
         adapter.terminate();
     });
 
-    function handleAdapter(msg : MessageEvent) {
+    async function handleAdapter(msg : MessageEvent) {
         if (msg.data.type == "init" && msg.data.value) {
             tokenLimit = msg.data.value;
             console.log("Confirmed worker creation.");
@@ -44,7 +66,7 @@
 
             let e = inputEvents.shift();
             if (e !== undefined && e.detail.submit && !store.has(hashCode(e.detail.text))) {
-                store.set(hashCode(e.detail.text), {
+                await store.setBlock(hashCode(e.detail.text), {
                     text: e.detail.text,
                     vec: currEmbedding,
                     timestamp: Date.now(),
@@ -55,12 +77,13 @@
         }
     }
 
-    function removeNode(e: CustomEvent) {
+    async function removeNode(e: CustomEvent) {
+        // potential bug: shouldn't be able to delete anything if there are unsaved shift events
         let block = store.getByEmbedding(e.detail.node.embedding);
         if (block) {
             tree.delete(e.detail.node.embedding, tree.root);
             tree = tree;
-            store.delete(hashCode(block.text));
+            await store.deleteBlock(hashCode(block.text));
             store = store;
             inputBarText = block.text;
             document.getElementById("input-bar")?.focus();

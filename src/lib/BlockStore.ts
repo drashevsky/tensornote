@@ -1,3 +1,5 @@
+import type { StorageAdapter } from "./storage/StorageAdapter";
+
 export interface Block {
     text: string, 
     vec: number[], 
@@ -6,24 +8,40 @@ export interface Block {
 }
 
 export class BlockStore extends Map<number, Block> {
+    private _adapter: StorageAdapter;
     private _embeddingKeys: Map<string, number>;
 
-    constructor() {
+    constructor(adapter: StorageAdapter) {
         super();
+        this._adapter = adapter;
         this._embeddingKeys = new Map<string, number>();
     }
 
-    set(n: number, b: Block): this {
+    async init() {
+        let contents = await this._adapter.readJson();
+        if (contents.length > 0) {
+            let savedBlockStore: Map<number, Block> = JSON.parse(contents, mapJsonReviver);
+            for (let entry of savedBlockStore.entries()) {
+                let [n, b] = entry;
+                super.set(n, b as Block);
+                this._embeddingKeys.set(JSON.stringify(b.vec.slice(0, 10)), n);
+            }
+        }
+    }
+
+    async setBlock(n: number, b: Block): Promise<this> {
         super.set(n, b);
+        await this._adapter.writeJson(JSON.stringify(this, mapJsonReplacer));
         this._embeddingKeys.set(JSON.stringify(b.vec.slice(0, 10)), n);
         return this;
     }
 
-    delete(n: number): boolean {
+    async deleteBlock(n: number): Promise<boolean> {
         let block = super.get(n);
         if (!block) return false;
 
         if (super.delete(n)) {
+            await this._adapter.writeJson(JSON.stringify(this, mapJsonReplacer));
             for (let key in this._embeddingKeys.keys) {
                 if (key == JSON.stringify(block.vec.slice(0, 10))) {
                     this._embeddingKeys.delete(key);
@@ -33,6 +51,12 @@ export class BlockStore extends Map<number, Block> {
         }
 
         return false;
+    }
+
+    async clear(): Promise<void> {
+        super.clear();
+        await this._adapter.writeJson("");
+        this._embeddingKeys.clear();
     }
 
     // Relies on first 10 floats of embedding as basis for hash. Not sure how robust this will be, 
@@ -55,4 +79,24 @@ export function hashCode(s: string): number {
         hash |= 0; // Convert to 32bit integer
     }
     return hash;
+}
+
+function mapJsonReplacer(key: string, value: any) {
+    if(value instanceof Map) {
+        return {
+            dataType: 'Map',
+            value: [...value],
+        };
+    } else {
+        return value;
+    }
+}
+
+function mapJsonReviver(key: string, value: any) {
+    if (typeof value === 'object' && value !== null) {
+        if (value.dataType === 'Map') {
+            return new Map(value.value);
+        }
+    }
+    return value;
 }
