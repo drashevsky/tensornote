@@ -14,9 +14,6 @@ dependencies:
   keyword-extractor:
     specifier: ^0.0.28
     version: 0.0.28
-  sakura.css:
-    specifier: ^1.5.0
-    version: 1.5.0
 
 devDependencies:
   '@sveltejs/adapter-auto':
@@ -2722,10 +2719,6 @@ packages:
 
   /safe-buffer@5.2.1:
     resolution: {integrity: sha512-rp3So07KcdmmKbGvgaNxQSJr7bGVSVk5S9Eq1F+ppbRo70+YeaDxkw5Dd8NPN+GD6bjnYm2VuPuCXmpuYvmCXQ==}
-    dev: false
-
-  /sakura.css@1.5.0:
-    resolution: {integrity: sha512-AcAZa9F4SCs2xaKLWcXQxJxKfeod2PN3sR31+R22MKuyoJxNChH1wBG4mQaY9gVpJ3VpNA1XHPOrOM9hFo9cSw==}
     dev: false
 
   /sander@0.5.1:
