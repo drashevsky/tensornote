@@ -36,11 +36,12 @@
     }
 
     $: text && inputBarUpdated();   // this line doesn't fire when the whole textbox is emptied
-    $: word_count = text.split(/\s+/).length;
+    $: word_count = text.split(/\s+/).filter(token => token.length > 0).length;
 </script>
 
 <div class="fixed bottom-0 w-full h-[15%] p-3">
-    <textarea id="input-bar" class="w-full h-full p-1 border border-gray-500 rounded-md resize-none" 
+    <textarea id="input-bar" 
+        class="w-full h-full bg-zinc-50 p-1 border border-gray-500 rounded-md resize-none" 
         placeholder="Space to type or search. Enter to submit. Shift + enter for newline." 
         bind:value={text}
         on:keydown={handleKey}/>
