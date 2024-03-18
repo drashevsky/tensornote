@@ -36,7 +36,7 @@
     }
 
     function getTitle(node: NavTreeNode): string {
-        if (currNode.children.length == 0 || currNode.embedding.length == 0)
+        if (node.children.length == 0 || node.embedding.length == 0)
             return UNTITLED_SUBLIST_NAME;
         
         let descendants = descFunc(node);
