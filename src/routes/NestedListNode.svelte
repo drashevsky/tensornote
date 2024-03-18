@@ -83,7 +83,7 @@
             <svg viewBox="0 0 20 20" class="w-5 h-5 mt-1 mr-2 shrink-0 fill-slate-700">
                 <circle cx="10" cy="10" r="3.5"></circle>
             </svg>
-            <div class="h-full font-bold italic">{title}</div>
+            <div class="h-full font-bold">{title}</div>
         </div>
         {#if !closed}
             <div class="w-full pl-10" transition:slide>

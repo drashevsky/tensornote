@@ -39,12 +39,12 @@
     $: word_count = text.split(/\s+/).length;
 </script>
 
-<div class="fixed bottom-0 w-full h-[20%]">
-    <textarea id="input-bar" class="w-full h-full resize-none" 
+<div class="fixed bottom-0 w-full h-[15%] p-3">
+    <textarea id="input-bar" class="w-full h-full p-1 border border-gray-500 rounded-md resize-none" 
         placeholder="Space to type or search. Enter to submit. Shift + enter for newline." 
         bind:value={text}
         on:keydown={handleKey}/>
-    <div class="absolute bottom-0 right-5 {word_count > tokenLimit ? 
+    <div class="absolute bottom-3 right-5 {word_count > tokenLimit ? 
         "text-red-600" : 
         "text-black/75"}">
         {word_count} / {tokenLimit} {word_count > tokenLimit ? "Cursor accuracy reduced" : ""} 

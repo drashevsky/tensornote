@@ -47,7 +47,7 @@
     $: currEmbedding && updateCursor();
 </script>
 
-<div class="w-full h-[75%] break-words overflow-scroll overflow-x-hidden p-3 border border-black"
+<div class="w-full h-[85%] break-words overflow-scroll overflow-x-hidden p-3"
      bind:this={notes_el}>
     <NestedListNode {store} 
                     currNode={tree.root} 
