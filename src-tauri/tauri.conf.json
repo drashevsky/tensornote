@@ -21,6 +21,10 @@
         "renameFile": true,
         "exists": true,
         "scope": ["$APPDATA/*", "$APPDATA/**"]
+      },
+      "shell": {
+        "all": true,
+        "open": true
       }
     },
     "bundle": {

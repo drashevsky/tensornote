@@ -41,6 +41,11 @@
                     on:click={handleClick}>
                 Clear all
             </button>
+            <a class="w-full px-4 py-3 block text-blue-600 underline hover:bg-zinc-100" 
+               href="https://www.github.com/drashevsky/tensornote" 
+               target="_blank">
+               GitHub
+            </a>
         </div>
     {/if}
 </div>
