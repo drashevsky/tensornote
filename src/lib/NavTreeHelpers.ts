@@ -10,10 +10,12 @@ export function printTree(store: BlockStore,
                           currNode: NavTreeNode, 
                           depth: string): string {
 
+    let sortedChildren = [...currNode.children].sort((a, b) => sortNodes(store, currNode, a, b));
+
     // special case: root node
     if (currNode.embedding.length == 0) {
         let clusterStr = "";
-        currNode.children.forEach((child) => {
+        sortedChildren.forEach((child) => {
             clusterStr += printTree(store, tree, child, depth + "\t");
         });
         return clusterStr;
@@ -26,7 +28,7 @@ export function printTree(store: BlockStore,
     // recursive case: it's a cluster
     } else {
         let clusterStr = depth + "- " + getTitle(store, node => tree.getDescendants(node), currNode) + "\n";
-        currNode.children.forEach((child) => {
+        sortedChildren.forEach((child) => {
             clusterStr += printTree(store, tree, child, depth + "\t");
         });
         return clusterStr;
