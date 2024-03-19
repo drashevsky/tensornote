@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { BlockStore } from "$lib/BlockStore";
     import type { NavTreeNode } from "$lib/NavTree";
-    import { getTitle, sortNodes } from "$lib/PrintTree";
+    import { getTitle, sortNodes } from "$lib/NavTreeHelpers";
     import { createEventDispatcher } from 'svelte';
     import { slide } from "svelte/transition";
 
