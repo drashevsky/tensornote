@@ -16,7 +16,7 @@ export function printTree(store: BlockStore,
     if (currNode.embedding.length == 0) {
         let clusterStr = "";
         sortedChildren.forEach((child) => {
-            clusterStr += printTree(store, tree, child, depth + "\t");
+            clusterStr += printTree(store, tree, child, depth);
         });
         return clusterStr;
     }
