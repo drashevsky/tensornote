@@ -23,10 +23,10 @@
     onMount(async () => {
 
         // Setup blockstore
-        let storageApi = window.__TAURI__ ? 
+        let storageApi = '__TAURI__' in window ? 
             (await import("$lib/storage/TauriFsAdapter")).TauriFsAdapter : 
             (await import("$lib/storage/WebStorageAdapter")).WebStorageAdapter;
-        let storageName = window.__TAURI__ ?  STORE_JSON_FILE : STORE_WEBSTORE_KEY;
+        let storageName = '__TAURI__' in window ?  STORE_JSON_FILE : STORE_WEBSTORE_KEY;
         let storageAdapter = await storageApi.create(storageName);
         store = new BlockStore(storageAdapter);
         await store.init();
