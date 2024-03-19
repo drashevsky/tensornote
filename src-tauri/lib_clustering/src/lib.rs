@@ -12,6 +12,8 @@ use ndarray::{Array2, Axis};
 use ndarray_rand::rand::SeedableRng;
 use rand_xoshiro::Xoshiro256Plus;
 use std::cmp::Ordering;
+use js_sys::{Float32Array, BigInt64Array};
+use wasm_bindgen::prelude::*;
 
 mod distfns;
 use distfns::CosDist;
@@ -127,4 +129,55 @@ pub fn dbscan_cluster(embeddings: Vec<f32>,
     (centroids, 
      records.into_raw_vec(), 
      targets.map(|&x| x.map(|c| c as i64).unwrap_or(-1)).into_raw_vec())
+}
+
+// Return struct representing result of clustering from wasm module to javascript
+#[wasm_bindgen]
+pub struct ClusterResult {
+    centroids: Vec<f32>,
+    embeddings: Vec<f32>,
+    targets: Vec<i64>
+ }
+
+#[wasm_bindgen]
+impl ClusterResult {
+    #[wasm_bindgen(getter)]
+    pub fn centroids(&self) -> Float32Array {
+        js_sys::Float32Array::from(&self.centroids[..])
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn embeddings(&self) -> Float32Array {
+        js_sys::Float32Array::from(&self.embeddings[..])
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn targets(&self) -> BigInt64Array {
+        js_sys::BigInt64Array::from(&self.targets[..])
+    }
+}
+
+// Wasm binding for kmeans_cluster
+#[wasm_bindgen]
+pub fn kmeans_wasm(embeddings: Vec<f32>,
+                   embeddings_cnt: usize,
+                   embeddings_dims: usize,
+                   batch_size: usize,
+                   n_clusters: usize, ) -> ClusterResult {
+    let (centroids, embeddings, targets) = 
+        kmeans_cluster(embeddings, embeddings_cnt, embeddings_dims, batch_size, n_clusters);
+
+    ClusterResult { centroids, embeddings, targets }
+}
+
+// Wasm binding for dbscan_cluster
+#[wasm_bindgen]
+pub fn dbscan_wasm(embeddings: Vec<f32>,
+                   embeddings_cnt: usize,
+                   embeddings_dims: usize,
+                   min_cluster_pts: usize) -> ClusterResult {
+    let (centroids, embeddings, targets) = 
+        dbscan_cluster(embeddings, embeddings_cnt, embeddings_dims, min_cluster_pts);
+
+    ClusterResult { centroids, embeddings, targets }
 }
