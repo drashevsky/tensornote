@@ -17,12 +17,11 @@ mod distfns;
 use distfns::CosDist;
 
 // Take a vector containing a flattened matrix and cluster it using kmeans
-#[tauri::command(rename_all = "snake_case")]
 pub fn kmeans_cluster(embeddings: Vec<f32>,
-           embeddings_cnt: usize,
-           embeddings_dims: usize,
-           batch_size: usize,
-           n_clusters: usize, ) -> (Vec<f32>, Vec<f32>, Vec<i64>) {
+                      embeddings_cnt: usize,
+                      embeddings_dims: usize,
+                      batch_size: usize,
+                      n_clusters: usize, ) -> (Vec<f32>, Vec<f32>, Vec<i64>) {
    
     let mut rng = Xoshiro256Plus::seed_from_u64(42);
     let data = Array2::from_shape_vec((embeddings_cnt, embeddings_dims), embeddings).unwrap();
@@ -57,11 +56,10 @@ pub fn kmeans_cluster(embeddings: Vec<f32>,
 }
 
 // Take a vector containing a flattened matrix and cluster it using dbscan
-#[tauri::command(rename_all = "snake_case")]
 pub fn dbscan_cluster(embeddings: Vec<f32>,
-                  embeddings_cnt: usize,
-                  embeddings_dims: usize,
-                  min_cluster_pts: usize) -> (Vec<f32>, Vec<f32>, Vec<i64>) {
+                      embeddings_cnt: usize,
+                      embeddings_dims: usize,
+                      min_cluster_pts: usize) -> (Vec<f32>, Vec<f32>, Vec<i64>) {
 
     // Imports the 2d embeddings matrix
     let mut rng = Xoshiro256Plus::seed_from_u64(42);

@@ -66,14 +66,7 @@ checksum = "5ad32ce52e4161730f7098c077cd2ed6229b5804ccf99e5366be1ab72a98b4e1"
 name = "app"
 version = "0.1.0"
 dependencies = [
- "linfa",
- "linfa-clustering",
- "linfa-nn",
- "ndarray",
- "ndarray-rand",
- "rand_xoshiro",
- "serde",
- "serde_json",
+ "lib_clustering",
  "tauri",
  "tauri-build",
 ]
@@ -1434,6 +1427,20 @@ name = "lazy_static"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
+
+[[package]]
+name = "lib_clustering"
+version = "0.1.0"
+dependencies = [
+ "linfa",
+ "linfa-clustering",
+ "linfa-nn",
+ "ndarray",
+ "ndarray-rand",
+ "rand_xoshiro",
+ "serde",
+ "serde_json",
+]
 
 [[package]]
 name = "libc"
