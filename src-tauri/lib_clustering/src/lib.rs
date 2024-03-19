@@ -137,7 +137,7 @@ pub struct ClusterResult {
     centroids: Vec<f32>,
     embeddings: Vec<f32>,
     targets: Vec<i64>
- }
+}
 
 #[wasm_bindgen]
 impl ClusterResult {
