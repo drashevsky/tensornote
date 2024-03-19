@@ -9,7 +9,16 @@ export function printTree(store: BlockStore,
                           tree: NavTree, 
                           currNode: NavTreeNode, 
                           depth: string): string {
-        
+
+    // special case: root node
+    if (currNode.embedding.length == 0) {
+        let clusterStr = "";
+        currNode.children.forEach((child) => {
+            clusterStr += printTree(store, tree, child, depth + "\t");
+        });
+        return clusterStr;
+    }
+
     // base case: it's a block
     if (currNode.children.length == 0) {
         return depth + "- " + store.getByEmbedding(currNode.embedding)?.text.trim() + "\n";
