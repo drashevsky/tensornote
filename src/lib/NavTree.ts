@@ -28,12 +28,8 @@ export class NavTree {
     // Also builds an internal cluster -> block descendants map
     public async buildTree(embeddings: number[][]) {
 
-        // Cannot cluster 0 elements
-        if (embeddings.length == 0) {
-            return;
-
         // Less than or equal to ROOT_CHILDREN_MAX, no need to cluster
-        } else if (embeddings.length <= ROOT_CHILDREN_MAX) {
+        if (embeddings.length <= ROOT_CHILDREN_MAX) {
             this._root.children = [];
             embeddings.forEach((embedding) => {
                 this._root.children.push({embedding, children: []})
