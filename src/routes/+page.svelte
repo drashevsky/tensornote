@@ -6,6 +6,7 @@
     import InputBar from './InputBar.svelte';
     import NavBar from "./NavBar.svelte";
     import Notes from "./Notes.svelte";
+    import { printTree } from "$lib/NavTreeHelpers";
 
     const MODEL = "TaylorAI/bge-micro-v2";
     const STORE_JSON_FILE = "store-" + MODEL.replace("/", "-") + ".json";
@@ -89,9 +90,21 @@
             document.getElementById("input-bar")?.focus();
         }
     }
+
+    async function exportToClipboard() {
+        await navigator.clipboard.writeText(await printTree(store, tree, tree.root, ""));
+    }
+
+    async function clear() {
+        await store.clear();
+        let embeddings: number[][] = Array.from(store.values()).map(block => block.vec);
+        await tree.buildTree(embeddings);
+        store = store;
+        tree = tree;
+    }
 </script>
 
-<NavBar />
+<NavBar on:toclipboard={exportToClipboard} on:clear={clear}/>
 <Notes {store} {tree} {currEmbedding} on:removenode={removeNode}/>
 <InputBar text={inputBarText} {tokenLimit} on:inputbarupdate={(event) => {
     adapter.postMessage({type: "embed", value: event.detail.text});

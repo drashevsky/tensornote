@@ -1,7 +1,20 @@
-<script>
+<script lang="ts">
     import img from "$lib/logo.png";
+    import { createEventDispatcher } from 'svelte';
 
+    const dispatch = createEventDispatcher();
+
+    let exportBtn: HTMLElement;
+    let clearBtn: HTMLElement;
     let closed = true;
+
+    function handleClick(e: MouseEvent) {
+        if (e.currentTarget == exportBtn) {
+            dispatch('toclipboard');
+        } else if (e.currentTarget == clearBtn) {
+            dispatch('clear');
+        }
+    }
 </script>
 
 <div class="fixed top-2 right-6 flex flex-col items-end">
@@ -18,10 +31,14 @@
                 <img src="{img}" class="w-5 h-5 mr-2" alt="TensorNote"/>
                 <p>TensorNote</p>
             </div>
-            <button class="w-full px-4 py-3 block text-left hover:bg-zinc-100">
+            <button class="w-full px-4 py-3 block text-left hover:bg-zinc-100" 
+                    bind:this={exportBtn} 
+                    on:click={handleClick}>
                 Copy all to clipboard
             </button>
-            <button class="w-full px-4 py-3 block text-left hover:bg-zinc-100">
+            <button class="w-full px-4 py-3 block text-left hover:bg-zinc-100" 
+                    bind:this={clearBtn} 
+                    on:click={handleClick}>
                 Clear all
             </button>
         </div>
