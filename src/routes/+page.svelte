@@ -8,11 +8,12 @@
     import Notes from "./Notes.svelte";
     import { printTree } from "$lib/NavTreeHelpers";
 
-    const MODEL = "TaylorAI/bge-micro-v2";
-    const STORE_JSON_FILE = "store-" + MODEL.replace("/", "-") + ".json";
-    const STORE_WEBSTORE_KEY = "blockstore-" + MODEL.replace("/", "-");
+    const INIT_MODEL = "TaylorAI/bge-micro-v2";
+    const STORE_JSON_FILE = (model: string) => "store-" + model.replace("/", "-") + ".json";
+    const STORE_WEBSTORE_KEY = (model: string) => "blockstore-" + model.replace("/", "-");
 
     let loaded = false;
+    let model = INIT_MODEL;
     let store : BlockStore;
     let tree : NavTree;
     let adapter : Worker;
@@ -33,7 +34,7 @@
         let storageApi = '__TAURI__' in window ? 
             (await import("$lib/storage/TauriFsAdapter")).TauriFsAdapter : 
             (await import("$lib/storage/WebStorageAdapter")).WebStorageAdapter;
-        let storageName = '__TAURI__' in window ?  STORE_JSON_FILE : STORE_WEBSTORE_KEY;
+        let storageName = '__TAURI__' in window ?  STORE_JSON_FILE(model) : STORE_WEBSTORE_KEY(model);
         let storageAdapter = await storageApi.create(storageName);
         store = new BlockStore(storageAdapter);
         await store.init();
@@ -57,7 +58,7 @@
         // Setup embedding adapter
         const w = await import('$lib/embeddings/EmbeddingAdapterWorker.ts?worker');
         adapter = new w.default();
-        adapter.postMessage({type: "init", value: MODEL});
+        adapter.postMessage({type: "init", value: model});
         adapter.addEventListener("message", handleAdapter);
 
         // Add keyboard shortcut to input bar
@@ -105,6 +106,12 @@
         }
     }
 
+    async function changeModel(modelName: string) {
+        loaded = false;
+        model = modelName;
+        await loadTensorNote();
+    }
+
     async function exportToClipboard() {
         await navigator.clipboard.writeText(await printTree(store, tree, tree.root, ""));
     }
@@ -119,7 +126,10 @@
 </script>
 
 {#if loaded}
-    <NavBar on:toclipboard={exportToClipboard} on:clear={clear}/>
+    <NavBar currModel={model}
+            on:changemodel={(event) => changeModel(event.detail.model)} 
+            on:toclipboard={exportToClipboard} 
+            on:clear={clear}/>
     <Notes {store} {tree} {currEmbedding} on:removenode={removeNode}/>
     <InputBar text={inputBarText} {tokenLimit} on:inputbarupdate={(event) => {
         adapter.postMessage({type: "embed", value: event.detail.text});
