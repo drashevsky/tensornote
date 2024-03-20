@@ -106,7 +106,7 @@
     }
 
     async function exportToClipboard() {
-        await navigator.clipboard.writeText(await printTree(store, tree, tree.root, ""));
+        await navigator.clipboard.writeText(await printTree(store, tree, tree.root, "", ""));
     }
 
     async function clear() {

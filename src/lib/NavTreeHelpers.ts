@@ -7,19 +7,11 @@ const UNTITLED_SUBLIST_NAME = "Untitled Sublist";
 
 export function printTree(store: BlockStore, 
                           tree: NavTree, 
-                          currNode: NavTreeNode, 
+                          currNode: NavTreeNode,
+                          title: string, 
                           depth: string): string {
 
     let sortedChildren = [...currNode.children].sort((a, b) => sortNodes(store, currNode, a, b));
-
-    // special case: root node
-    if (currNode.embedding.length == 0) {
-        let clusterStr = "";
-        sortedChildren.forEach((child) => {
-            clusterStr += printTree(store, tree, child, depth);
-        });
-        return clusterStr;
-    }
 
     // base case: it's a block
     if (currNode.children.length == 0) {
@@ -27,10 +19,16 @@ export function printTree(store: BlockStore,
 
     // recursive case: it's a cluster
     } else {
-        let clusterStr = depth + "- " + getTitle(store, node => tree.getDescendants(node), currNode) + "\n";
-        sortedChildren.forEach((child) => {
-            clusterStr += printTree(store, tree, child, depth + "\t");
-        });
+        let clusterStr = "";
+        if (currNode.embedding.length > 0) {                 // not root?
+            clusterStr += depth + "- " + title + "\n";
+            depth = depth + "\t";
+        }
+
+        let titles = getTitles(store, node => tree.getDescendants(node), sortedChildren);
+        for (let i = 0; i < sortedChildren.length; i++) {
+            clusterStr += printTree(store, tree, sortedChildren[i], titles[i], depth);
+        }
         return clusterStr;
     }
 }
