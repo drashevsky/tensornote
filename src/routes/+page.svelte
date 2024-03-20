@@ -39,6 +39,8 @@
         await store.init();
 
         // Load either tauri or wasm api. Rollup-plugin-rust doesn't do ts bindings officially yet
+        // See this tutorial: https://blog.logrocket.com/integrating-svelte-app-rust-webassembly/
+        // Documentation for rust plugin: https://github.com/wasm-tool/rollup-plugin-rust/
         const clusterLib = '__TAURI__' in window ? 
             (await import("@tauri-apps/api/tauri")) :
             //@ts-ignore
