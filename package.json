@@ -1,7 +1,11 @@
 {
 	"name": "tensornote",
-	"version": "0.0.1",
-	"private": true,
+	"version": "0.1.0",
+	"description": "A lightweight self-organizing notebook for your thoughts, powered by embeddings.",
+    "author": "Daniel Rashevsky",
+    "license": "GPL-3.0-or-later",
+    "private": true,
+    "keywords": [],
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
