@@ -5,9 +5,9 @@
 
 import models from './models.json';
 
-type embeddingModelType = "huggingface-transformers" | "openai";
+export type embeddingModelType = "huggingface-transformers" | "openai";
 
-interface embeddingModel {
+export interface embeddingModel {
     model_name : string,
     batch_size : number,
     dims : number,
@@ -17,7 +17,7 @@ interface embeddingModel {
     type : embeddingModelType
 }
 
-interface embeddingModels {
+export interface embeddingModels {
     [key : string] : embeddingModel
 }
 
