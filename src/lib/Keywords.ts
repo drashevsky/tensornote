@@ -7,7 +7,7 @@ export function getKeywords(text: string): [string, number][] {
         return_changed_case: true,
         remove_duplicates: false
     });
-    return getTermFrequencies(keywords);
+    return getTermFrequencies(keywords, false);
 }
 
 // Given a matrix with arrays of sorted keyword scores, get the top n keywords of the corpus 
@@ -63,8 +63,9 @@ export function getTfIdf(freq_matrix: [string, number][][], just_idf: boolean): 
 }
 
 // Calculates term frequency of keywords in an array, sort array by term frequency
-export function getTermFrequencies(keywords: string[]): [string, number][] {
-    const unit = 1 / keywords.length;
+// just_count: return only the term counts
+export function getTermFrequencies(keywords: string[], just_count: boolean): [string, number][] {
+    const unit = just_count ? 1 : 1 / keywords.length;
     let freqmap = new Map<string, number>();
     for (let keyword of keywords) {
         let oldfreq = freqmap.get(keyword);
