@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { BlockStore } from "$lib/BlockStore";
     import type { NavTreeNode } from "$lib/NavTree";
-    import { getTitle, sortNodes } from "$lib/NavTreeHelpers";
+    import { getTitles, sortNodes } from "$lib/NavTreeHelpers";
     import { createEventDispatcher } from 'svelte';
     import { slide } from "svelte/transition";
 
@@ -12,13 +12,15 @@
 
     export let store: BlockStore;
     export let currNode: NavTreeNode;
+    export let title: string;
     export let cursorNode: NavTreeNode;
     export let descFunc: (node: NavTreeNode) => number[][];
     const dispatch = createEventDispatcher();
     const sortFunc = (a: NavTreeNode, b: NavTreeNode) => sortNodes(store, currNode, a, b);
 
     let closed = false;
-    let title = "";
+    let sortedChildren: NavTreeNode[] = [];
+    let titles: string[] = [];
 
     function handleKey(e: KeyboardEvent) {
         if (e.key == "Escape") {
@@ -32,13 +34,14 @@
         dispatch('removenode', {node: currNode});
     }
 
-    $: title = getTitle(store, descFunc, currNode);
+    $: sortedChildren = [...currNode.children].sort(sortFunc);
+    $: titles = getTitles(store, descFunc, sortedChildren);
 </script>
 
 <div class="w-full pt-1 {(cursorNode == currNode) ? CURSOR_ACTIVE : ""}">
     {#if currNode.children.length > 0 && currNode.embedding.length == 0}
-        {#each [...currNode.children].sort(sortFunc) as child}
-            <svelte:self {store} currNode={child} {cursorNode} {descFunc} on:removenode/>
+        {#each sortedChildren as child, i}
+            <svelte:self {store} currNode={child} title={titles[i]} {cursorNode} {descFunc} on:removenode/>
         {/each}
     {:else if currNode.children.length > 0}
         <div class="w-full h-full flex items-start">
@@ -56,8 +59,8 @@
         </div>
         {#if !closed}
             <div class="w-full pl-10" transition:slide>
-                {#each [...currNode.children].sort(sortFunc) as child}
-                    <svelte:self {store} currNode={child} {cursorNode} {descFunc} on:removenode/>
+                {#each sortedChildren as child, i}
+                    <svelte:self {store} currNode={child} title={titles[i]} {cursorNode} {descFunc} on:removenode/>
                 {/each}
             </div>
         {/if}

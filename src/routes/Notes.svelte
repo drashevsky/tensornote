@@ -50,7 +50,8 @@
 <div class="w-full h-[85%] break-words overflow-scroll overflow-x-hidden p-3"
      bind:this={notes_el}>
     <NestedListNode {store} 
-                    currNode={tree.root} 
+                    currNode={tree.root}
+                    title="" 
                     {cursorNode} 
                     descFunc={node => tree.getDescendants(node)} on:removenode/>
 </div>
