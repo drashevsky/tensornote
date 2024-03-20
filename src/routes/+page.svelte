@@ -12,16 +12,23 @@
     const STORE_JSON_FILE = "store-" + MODEL.replace("/", "-") + ".json";
     const STORE_WEBSTORE_KEY = "blockstore";
 
+    let loaded = false;
+    let store : BlockStore;
+    let tree : NavTree;
     let adapter : Worker;
     let tokenLimit: number = 0;
-    let store : BlockStore;
-    let tree : NavTree = new NavTree();
     let currEmbedding : number[] = [];
     let inputEvents : CustomEvent[] = [];
     let inputBarText: string = '';
 
-    onMount(async () => {
+    onMount(loadTensorNote);
 
+    onDestroy(() => {
+        adapter.terminate();
+    });
+
+    async function loadTensorNote() {
+        
         // Setup blockstore
         let storageApi = '__TAURI__' in window ? 
             (await import("$lib/storage/TauriFsAdapter")).TauriFsAdapter : 
@@ -31,7 +38,14 @@
         store = new BlockStore(storageAdapter);
         await store.init();
 
-        // Build navtree for 1st time
+        // Load either tauri or wasm api. Rollup-plugin-rust doesn't do ts bindings officially yet
+        const clusterLib = '__TAURI__' in window ? 
+            (await import("@tauri-apps/api/tauri")) :
+            //@ts-ignore
+            (await (await import("../../src-tauri/lib_clustering/Cargo.toml")).default());
+        
+        // Build tree for the first time
+        tree = new NavTree(clusterLib);
         if (store.size > 0) {
             let embeddings: number[][] = Array.from(store.values()).map(block => block.vec);
             await tree.buildTree(embeddings);
@@ -51,11 +65,9 @@
                 document.getElementById("input-bar")?.focus();
             }
         }
-    });
 
-    onDestroy(() => {
-        adapter.terminate();
-    });
+        loaded = true;
+    }
 
     async function handleAdapter(msg : MessageEvent) {
         if (msg.data.type == "init" && msg.data.value) {
@@ -104,9 +116,13 @@
     }
 </script>
 
-<NavBar on:toclipboard={exportToClipboard} on:clear={clear}/>
-<Notes {store} {tree} {currEmbedding} on:removenode={removeNode}/>
-<InputBar text={inputBarText} {tokenLimit} on:inputbarupdate={(event) => {
-    adapter.postMessage({type: "embed", value: event.detail.text});
-    inputEvents.push(event);
-}}/>
+{#if loaded}
+    <NavBar on:toclipboard={exportToClipboard} on:clear={clear}/>
+    <Notes {store} {tree} {currEmbedding} on:removenode={removeNode}/>
+    <InputBar text={inputBarText} {tokenLimit} on:inputbarupdate={(event) => {
+        adapter.postMessage({type: "embed", value: event.detail.text});
+        inputEvents.push(event);
+    }}/>
+{:else}
+    <p>Loading TensorNote...</p>
+{/if}

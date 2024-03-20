@@ -7,6 +7,7 @@ edition = "2021"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+getrandom = { version = "0.2.12", features = ["js"] }
 js-sys = "0.3.69"
 linfa = "0.7.0"
 linfa-clustering = "0.7.0"

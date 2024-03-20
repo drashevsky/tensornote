@@ -1,5 +1,3 @@
-import { invoke } from '@tauri-apps/api/tauri'
-
 const BATCH_SIZE = 128;             //https://ai.stackexchange.com/questions/8560/how-do-i-choose-the-optimal-batch-size
 const ROOT_CHILDREN_MAX = 7;        //https://www.crossrivertherapy.com/memory-capacity-of-human-brain
 const KMEANS_NCLUSTER_COEFF = 0.5;
@@ -12,10 +10,12 @@ export interface NavTreeNode {
 }
 
 export class NavTree {
+    private _clusterLib: any;
     private _root: NavTreeNode;
     private _clusterDescendants: {[key: string]: number[][]};
 
-    constructor() {
+    constructor(clusterLib: any) {
+        this._clusterLib = clusterLib;
         this._root = {embedding: [], children: []};
         this._clusterDescendants = {};
     }
@@ -45,7 +45,7 @@ export class NavTree {
         while (embeddings.length > ROOT_CHILDREN_MAX) {
 
             // Cluster embeddings
-            let [centroids, records, targets] = await kmeans_cluster(embeddings);
+            let [centroids, records, targets] = await kmeans_cluster(this._clusterLib, embeddings);
 
             // Reduce precision to 8 decimal places like in LocalEmbeddingAdapter
             centroids = centroids.map(val => Math.round(val * 100000000) / 100000000);
@@ -250,29 +250,52 @@ export function csim(vec1: number[], vec2: number[]) {
 
 // Given a list of embeddings, returns flattened 2d matrices of centroids and original 
 // embeddings, as well as an array of cluster assignments using kmeans
-async function kmeans_cluster(embeddings: number[][]): Promise<[number[], number[], number[]]> {
+async function kmeans_cluster(clusterLib: any, embeddings: number[][]): Promise<[number[], number[], number[]]> {
     let embeddings_cnt = embeddings.length;
     let embeddings_dims = embeddings[0].length;
-    return await invoke('kmeans_cluster', { 
-        embeddings: embeddings.flat(), 
-        embeddings_cnt, 
-        embeddings_dims,
-        batch_size: (embeddings_cnt < BATCH_SIZE) ? embeddings_cnt : BATCH_SIZE,
-        n_clusters: Math.ceil(Math.sqrt(embeddings_cnt * KMEANS_NCLUSTER_COEFF))
-    });
+
+    if ('__TAURI__' in window) {
+        return await clusterLib.invoke('kmeans_cluster', { 
+            embeddings: embeddings.flat(), 
+            embeddings_cnt, 
+            embeddings_dims,
+            batch_size: (embeddings_cnt < BATCH_SIZE) ? embeddings_cnt : BATCH_SIZE,
+            n_clusters: Math.ceil(Math.sqrt(embeddings_cnt * KMEANS_NCLUSTER_COEFF))
+        });
+    } else {
+        let res = clusterLib.kmeans_wasm(
+            embeddings.flat(), 
+            embeddings_cnt, 
+            embeddings_dims, 
+            (embeddings_cnt < BATCH_SIZE) ? embeddings_cnt : BATCH_SIZE,
+            Math.ceil(Math.sqrt(embeddings_cnt * KMEANS_NCLUSTER_COEFF))
+        );
+        return [Array.from(res.centroids), Array.from(res.embeddings), Array.from(res.targets)];
+    }
 }
 
 // Given a list of embeddings, returns flattened 2d matrices of centroids + noise points 
 // and original embeddings, as well as an array of cluster assignments using dbscan
-async function dbscan_cluster(embeddings: number[][]): Promise<[number[], number[], number[]]> {
+async function dbscan_cluster(clusterLib: any, embeddings: number[][]): Promise<[number[], number[], number[]]> {
     let embeddings_cnt = embeddings.length;
     let embeddings_dims = embeddings[0].length;
-    return await invoke('dbscan_cluster', { 
-        embeddings: embeddings.flat(), 
-        embeddings_cnt, 
-        embeddings_dims,
-        min_cluster_pts: DBSCAN_MIN_CLUSTER_PTS
-    });
+
+    if ('__TAURI__' in window) {
+        return await clusterLib.invoke('kmeans_cluster', { 
+            embeddings: embeddings.flat(), 
+            embeddings_cnt, 
+            embeddings_dims,
+            min_cluster_pts: DBSCAN_MIN_CLUSTER_PTS
+        });
+    } else {
+        let res = clusterLib.dbscan_wasm(
+            embeddings.flat(), 
+            embeddings_cnt, 
+            embeddings_dims, 
+            DBSCAN_MIN_CLUSTER_PTS
+        );
+        return [Array.from(res.centroids), Array.from(res.embeddings), Array.from(res.targets)];
+    }
 }
 
 // Take a flattened matrix and turn it into a 2d matrix

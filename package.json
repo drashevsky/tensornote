@@ -20,6 +20,7 @@
 		"@types/eslint": "^8.56.0",
 		"@typescript-eslint/eslint-plugin": "^7.0.0",
 		"@typescript-eslint/parser": "^7.0.0",
+		"@wasm-tool/rollup-plugin-rust": "^2.4.5",
 		"autoprefixer": "^10.4.17",
 		"eslint": "^8.56.0",
 		"eslint-plugin-svelte": "^2.35.1",
