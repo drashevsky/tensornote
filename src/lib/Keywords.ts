@@ -10,14 +10,15 @@ export function getKeywords(text: string): [string, number][] {
     return getTermFrequencies(keywords);
 }
 
-// Given a tfidf matrix, get the top n keywords of the corpus and their tfidf scores
-export function getTopNKeywords(tfidf_matrix: [string, number][][], n: number): [string, number][] {
+// Given a matrix with arrays of sorted keyword scores, get the top n keywords of the corpus 
+// and their scores
+export function getTopNKeywords(matrix: [string, number][][], n: number): [string, number][] {
     let keywords: [string, number][] = [];
 
     let search_idx = 0;
     while (keywords.length < n) {
-        let currKeywords = tfidf_matrix.filter(arr => arr[search_idx] !== undefined)
-                                       .map(arr => arr[search_idx]);
+        let currKeywords = matrix.filter(arr => arr[search_idx] !== undefined)
+                                 .map(arr => arr[search_idx]);
         
         if (currKeywords.length > 0) {
             keywords.push(...currKeywords.slice(0, n - keywords.length));
