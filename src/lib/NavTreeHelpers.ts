@@ -58,7 +58,7 @@ export function getTitles(store: BlockStore,
 
             let descendants = descFunc(children[i]);
             for (let j = 0; j < descendants.length; j++) {
-                let block = store.getByEmbedding(descendants[i]);
+                let block = store.getByEmbedding(descendants[j]);
                 if (block) largetext += " " + block.text;
             }
 
@@ -66,7 +66,9 @@ export function getTitles(store: BlockStore,
         }
     }
 
-    let titles = getTfIdf(freq_matrix, false).map(arr => arr.slice(0, NUM_KEYWORDS));
+    let titles = getTfIdf(freq_matrix, false).map(
+        arr => arr.slice(0, NUM_KEYWORDS).map(([a, b]) => a)
+    );
     return titles.map(keywords => keywords.length > 0 ? keywords.join(", ") : UNTITLED_SUBLIST_NAME);
 }
 
