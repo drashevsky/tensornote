@@ -1,5 +1,5 @@
 import { BlockStore } from "./BlockStore";
-import { getTfIdf, getTopNKeywords } from "./Keywords";
+import { getKeywords, getTfIdf, getTopNKeywords } from "./Keywords";
 import { NavTree, csim, type NavTreeNode } from "./NavTree";
 
 const NUM_KEYWORDS = 5;
@@ -33,6 +33,41 @@ export function printTree(store: BlockStore,
         });
         return clusterStr;
     }
+}
+
+// given a blockstore, function to find descendant embeddings, and a cluster node's children,
+// generate titles for the cluster node's children.
+export function getTitles(store: BlockStore, 
+                          descFunc: (node: NavTreeNode) => number[][], 
+                          children: NavTreeNode[]): string[] {
+    if (children.length == 0)
+        return [];
+
+    let freq_matrix = [];
+
+    for (let i = 0; i < children.length; i++) {
+        
+        // block
+        if (children[i].children.length == 0) {
+            let block = store.getByEmbedding(children[i].embedding);
+            if (block) freq_matrix.push(block.keywords);
+        
+        // cluster
+        } else {
+            let largetext = "";
+
+            let descendants = descFunc(children[i]);
+            for (let j = 0; j < descendants.length; j++) {
+                let block = store.getByEmbedding(descendants[i]);
+                if (block) largetext += " " + block.text;
+            }
+
+            freq_matrix.push(getKeywords(largetext));
+        }
+    }
+
+    let titles = getTfIdf(freq_matrix, false).map(arr => arr.slice(0, NUM_KEYWORDS));
+    return titles.map(keywords => keywords.length > 0 ? keywords.join(", ") : UNTITLED_SUBLIST_NAME);
 }
 
 // given a blockstore, function to find descendant embeddings, and a cluster node,
