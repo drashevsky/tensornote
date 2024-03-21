@@ -8,7 +8,7 @@
     import Notes from "./Notes.svelte";
     import { printTree } from "$lib/NavTreeHelpers";
 
-    const MODEL = "TaylorAI/bge-micro-v2";
+    const MODEL = "Xenova/jina-embeddings-v2-small-en-2048";
     const STORE_JSON_FILE = "store-" + MODEL.replace("/", "-") + ".json";
     const STORE_WEBSTORE_KEY = "blockstore-" + MODEL.replace("/", "-");
 
