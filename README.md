@@ -2,7 +2,7 @@
 
 ## What is TensorNote?
 
-TensorNote is a lightweight notebook that organizes your thinking for you, efficiently and quickly. It is specifically geared for **rapid capture**. By typing whatever you are thinking into the input box, TensorNote's **magic cursor** will steer your train of thought to the right place for saving an idea or finding related notes. As more stuff is added, TensorNote builds a nested list that groups related items. Under the hood, it uses embeddings, clustering, tfidf, and more to reduce the cognitive load and disruption of organizing your notes. Try it out [here](https://drashevsky.github.io/tensornote/). It is local-first, so any ideas you have saved will remain with you.
+TensorNote is a lightweight notebook that organizes your thinking for you, efficiently and quickly. It is specifically geared for **rapid capture**. By typing whatever you are thinking into the input box, TensorNote's **magic cursor** will steer your train of thought to the right place for saving an idea or finding related notes. As more stuff is added, TensorNote builds a nested list that groups related items. Under the hood, it uses embeddings, clustering, tfidf, and more to reduce the cognitive load and disruption of organizing your notes. It is local-first, so any ideas you have saved will remain with you. Try it out [here](https://drashevsky.github.io/tensornote/)!
 
 ![Screenshot of TensorNote](docs/TensorNoteScreenshot.png)
 
