@@ -6,7 +6,7 @@ description = "A lightweight self-organizing notebook for your thoughts, powered
 authors = ["Daniel Rashevsky"]
 license = "GPL-3.0-or-later"
 repository = ""
-default-run = "app"
+default-run = "tensornote"
 edition = "2021"
 rust-version = "1.60"
 
