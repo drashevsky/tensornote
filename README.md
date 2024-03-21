@@ -1,16 +1,16 @@
 # TensorNote
 
-[Screenshot of TensorNote](docs/TensorNoteScreenshot.png)
-
 ## What is TensorNote?
 
-TensorNote is a lightweight notebook that organizes your thinking for you, efficiently and quickly. It is specifically geared for rapid capture. Just go to the input box and type in whatever you are looking for and thinking, and TensorNote's **magic cursor** will steer your train of thought to the right place in a nested list for saving an idea or finding related notes. Under the hood, it uses embeddings, clustering, tfidf, and more to reduce the disruption and cognitive load of organizing your notes. Try it out [here](https://drashevsky.github.io/tensornote/). It is local-first, so any ideas you have saved will remain with you.
+TensorNote is a lightweight notebook that organizes your thinking for you, efficiently and quickly. It is specifically geared for **rapid capture**. By typing whatever you are thinking into the input box, TensorNote's **magic cursor** will steer your train of thought to the right place for saving an idea or finding related notes. Under the hood, it uses embeddings, clustering, tfidf, and more to reduce the cognitive load and disruption of organizing your notes. Try it out [here](https://drashevsky.github.io/tensornote/). It is local-first, so any ideas you have saved will remain with you.
+
+![Screenshot of TensorNote](docs/TensorNoteScreenshot.png)
 
 ## The Information Overload Problem
-Today, you can easily Google search anything from events happening on the other side of the world to the hundreds of options available online for any product of your choosing. The information we all have access to from our fingertips is gargantuan. Instead of making us more enlightened, however, society is drowning in information. This **information overload** is hampering our ability to think clearly and make good decisions. As the knowledge economy expands and more people interact with increasingly large amounts of information, it helps to have a tool that can cut through the noise. If you want to read more, I've linked some previous [thinking](https://drashevsky.github.io/posts/SecondBrain.html) I've done on this topic.
+Today, you can easily Google search anything, from events happening on the other side of the world to the hundreds of options available online for any product of your choosing. The information we can access from our fingertips is gargantuan. Instead of making us more enlightened, however, society is drowning in information. This **information overload** is hampering our ability to think clearly and make good decisions. As the knowledge economy expands and more people interact with increasingly large amounts of information, it helps to have a tool that can cut through the noise. If you want to read more, I've linked some previous [thinking](https://drashevsky.github.io/posts/SecondBrain.html) I've done on this topic.
 
 ## Tech Stack
-TensorNote is built with SvelteKit (Svelte + TypeScript + Vite) and Tailwind for the frontend. Embeddings and clustering are provided courtesy of [transformers.js](https://huggingface.co/docs/transformers.js/en/index) and linfa-clustering, respectively. The backend is built with Tauri and Rust for the desktop application, while the Rust wasm-bindgen library ports the same functionality to your browser.
+TensorNote is built with **SvelteKit** (_Svelte_ + _TypeScript_ + **Vite**) and **Tailwind** for the frontend. Embeddings and clustering are provided courtesy of [transformers.js](https://huggingface.co/docs/transformers.js/en/index) and **linfa-clustering**, respectively. The backend is built with **Tauri** and **Rust** for the desktop application, while the Rust _wasm-bindgen_ library ports the same functionality to your browser.
 
 ## How to Build TensorNote
 
@@ -33,6 +33,6 @@ Now you are ready! Clone the repository with: ``git clone https://www.github.com
 
 Run ``pnpm install`` to install all the necessary dependencies.
 
-To run the Tauri desktop application, run ``pnpm tauri dev``.
+To start the Tauri desktop application, run ``pnpm tauri dev``.
 
-To run the web application, run ``pnpm vite dev`` and click on the link printed to go to the webpage.
+To start the web application, run ``pnpm vite dev`` and click on the link printed to go to the webpage.
