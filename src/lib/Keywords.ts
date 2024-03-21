@@ -1,5 +1,6 @@
 import keyword_extractor from "keyword-extractor";
 
+// Tokenize and remove stopwords from a text to get the keywords and their term frequencies.
 export function getKeywords(text: string): [string, number][] {
     let keywords = keyword_extractor.extract(simpleTokenize(text).join(" "), {
         language:"english",
@@ -11,7 +12,7 @@ export function getKeywords(text: string): [string, number][] {
 }
 
 // Given a matrix with arrays of sorted keyword scores, get the top n keywords of the corpus 
-// and their scores
+// and their scores. This is just one way of doing it, could've just done concat > sort > slice too.
 export function getTopNKeywords(matrix: [string, number][][], n: number): [string, number][] {
     let keywords: [string, number][] = [];
 

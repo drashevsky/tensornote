@@ -71,6 +71,8 @@
         loaded = true;
     }
 
+    // Receives text -> embedding result from embedding adapter worker, updates current embedding,
+    // adds new block w/ embedding to blockstore if user had pressed enter
     async function handleAdapter(msg : MessageEvent) {
         if (msg.data.type == "init" && msg.data.value) {
             tokenLimit = msg.data.value;
