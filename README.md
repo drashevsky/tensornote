@@ -1,38 +1,38 @@
-# create-svelte
+# TensorNote
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+[Screenshot of TensorNote](docs/TensorNoteScreenshot.png)
 
-## Creating a project
+## What is TensorNote?
 
-If you're seeing this, you've probably already done this step. Congrats!
+TensorNote is a lightweight notebook that organizes your thinking for you, efficiently and quickly. It is specifically geared for rapid capture. Just go to the input box and type in whatever you are looking for and thinking, and TensorNote's **magic cursor** will steer your train of thought to the right place in a nested list for saving an idea or finding related notes. Under the hood, it uses embeddings, clustering, tfidf, and more to reduce the disruption and cognitive load of organizing your notes. Try it out [here](https://drashevsky.github.io/tensornote/). It is local-first, so any ideas you have saved will remain with you.
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+## The Information Overload Problem
+Today, you can easily Google search anything from events happening on the other side of the world to the hundreds of options available online for any product of your choosing. The information we all have access to from our fingertips is gargantuan. Instead of making us more enlightened, however, society is drowning in information. This **information overload** is hampering our ability to think clearly and make good decisions. As the knowledge economy expands and more people interact with increasingly large amounts of information, it helps to have a tool that can cut through the noise. If you want to read more, I've linked some previous [thinking](https://drashevsky.github.io/posts/SecondBrain.html) I've done on this topic.
 
-# create a new project in my-app
-npm create svelte@latest my-app
+## Tech Stack
+TensorNote is built with SvelteKit (Svelte + TypeScript + Vite) and Tailwind for the frontend. Embeddings and clustering are provided courtesy of [transformers.js](https://huggingface.co/docs/transformers.js/en/index) and linfa-clustering, respectively. The backend is built with Tauri and Rust for the desktop application, while the Rust wasm-bindgen library ports the same functionality to your browser.
+
+## How to Build TensorNote
+
+Make sure that you have ``node``, ``npm``, ``pnpm`` (this project uses it as package manager), ``rustup`` (follow the prompts to install the rust toolchain), and ``wasm-pack``. To check that everything works, run the following commands and ensure they print version numbers:
+
+```
+node --version
+npm --version
+npx --version
+pnpm --version
+rustup --version
+rustc --version
+cargo --version
+wasm-pack --version
 ```
 
-## Developing
+Before you build the project, you need to add rustc build targets for webassembly if they aren't already there. To do this, run: ``rustup target add wasm32-unknown-unknown``.
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+Now you are ready! Clone the repository with: ``git clone https://www.github.com/drashevsky/tensornote.git`` and ``cd`` into the created directory.
 
-```bash
-npm run dev
+Run ``pnpm install`` to install all the necessary dependencies.
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+To run the Tauri desktop application, run ``pnpm tauri dev``.
 
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+To run the web application, run ``pnpm vite dev`` and click on the link printed to go to the webpage.
