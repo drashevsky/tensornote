@@ -2,8 +2,8 @@ name: Build TensorNote for Web
 
 on:
   push:
-    tags:
-      - "release-web"
+    branches:
+      - main
 
 jobs:
   build:
