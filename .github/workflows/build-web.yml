@@ -30,7 +30,7 @@ jobs:
           version: latest
 
       - name: Add wasm32-unknown-unknown build target
-      - run: rustup target add wasm32-unknown-unknown
+        run: rustup target add wasm32-unknown-unknown
 
       - name: Build
         run: |
