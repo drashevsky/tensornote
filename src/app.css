@@ -13,12 +13,9 @@ html, html > body {
 
 @media (max-width: 684px) {
     html, html > body {
-        font-size: 0.85em;
+        font-size: 0.95em;
     }
 }
 
 @media (max-width: 382px) {
-    html, html > body {
-        font-size: 0.75em;
-    }
 }
