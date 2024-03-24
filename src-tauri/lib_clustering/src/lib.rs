@@ -6,9 +6,10 @@
 
 use linfa::dataset::{DatasetBase, Labels};
 use linfa::traits::{FitWith, Predict, Transformer};
+use linfa::metrics::SilhouetteScore;
 use linfa_clustering::{KMeans, IncrKMeansError, Dbscan};
 use linfa_nn::{KdTree, NearestNeighbour, distance::Distance};
-use ndarray::{Array2, Axis};
+use ndarray::{Array2, Axis, ArrayBase, OwnedRepr, Dim};
 use ndarray_rand::rand::SeedableRng;
 use rand_xoshiro::Xoshiro256Plus;
 use std::cmp::Ordering;
@@ -17,6 +18,9 @@ use wasm_bindgen::prelude::*;
 
 mod distfns;
 use distfns::CosDist;
+
+type ClusterRes = DatasetBase<ArrayBase<OwnedRepr<f32>, Dim<[usize; 2]>>, 
+                              ArrayBase<OwnedRepr<usize>, Dim<[usize; 1]>>>;
 
 // Take a vector containing a flattened matrix and cluster it using kmeans
 pub fn kmeans_cluster(embeddings: Vec<f32>,
@@ -28,28 +32,46 @@ pub fn kmeans_cluster(embeddings: Vec<f32>,
     let mut rng = Xoshiro256Plus::seed_from_u64(42);
     let data = Array2::from_shape_vec((embeddings_cnt, embeddings_dims), embeddings).unwrap();
     let dataset = DatasetBase::from(data.clone()).shuffle(&mut rng);                    // Imports the 2d embeddings matrix
-    let clf = KMeans::params_with(n_clusters, rng.clone(), CosDist).tolerance(1e-3);    // Sets up kmeans
 
-    // Repeatedly run fit_with on every batch in the dataset until we have converged.
-    // fit_with implements the mini-batch-k-means algorithm
-    let model = dataset
-        .sample_chunks(batch_size)
-        .cycle()
-        .try_fold(None, |current, batch| {
-            match clf.fit_with(current, &batch) {
-                Ok(model) => Err(model),
-                Err(IncrKMeansError::NotConverged(model)) => Ok(Some(model)),
-                Err(err) => panic!("unexpected kmeans error: {}", err),
-            }
-        })
-        .unwrap_err();
+    // Find optimal k and clustering
+    let mut i = 0;
+    let lower_bound: usize = ((embeddings_cnt / 2) as f32).sqrt().ceil() as usize;
+    let upper_bound: usize = ((embeddings_cnt * 2) as f32).sqrt().ceil() as usize;
+    let mut results: Vec<(KMeans<f32, CosDist>, ClusterRes)> = Vec::new();
+    let mut top_score: f32 = 0.0;
+    let mut top_score_idx = 0;
+
+    while i + lower_bound < upper_bound {
+        // Repeatedly run fit_with on every batch in the dataset until we have converged.
+        // fit_with implements the mini-batch-k-means algorithm
+        let clf = KMeans::params_with(i + lower_bound, rng.clone(), CosDist).tolerance(1e-3);    // Sets up kmeans
+        let model = dataset
+            .sample_chunks(batch_size)
+            .cycle()
+            .try_fold(None, |current, batch| {
+                match clf.fit_with(current, &batch) {
+                    Ok(model) => Err(model),
+                    Err(IncrKMeansError::NotConverged(model)) => Ok(Some(model)),
+                    Err(err) => panic!("unexpected kmeans error: {}", err),
+                }
+            })
+            .unwrap_err();
+
+        let result = model.predict(dataset.clone());
+        let silhouette_score = result.silhouette_score().unwrap();
+        if silhouette_score > top_score { 
+            top_score = silhouette_score;
+            top_score_idx = i;
+        }
+        results.push((model, result));
+        i += 1;
+    }
 
     // Extract centroids and cluster assignments
-    let dataset = model.predict(dataset);
-    let centroids = model.centroids().clone();
+    let centroids = results[top_score_idx].0.centroids().clone();
     let DatasetBase {
         records, targets, ..
-    } = dataset;
+    } = results[top_score_idx].1.clone();
 
     // Return flattened 2d matrices of centroids and original embeddings, arr of cluster assignments
     (centroids.into_raw_vec(), 
