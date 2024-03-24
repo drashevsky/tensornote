@@ -281,7 +281,7 @@ async function dbscan_cluster(clusterLib: any, embeddings: number[][]): Promise<
     let embeddings_dims = embeddings[0].length;
 
     if ('__TAURI__' in window) {
-        return await clusterLib.invoke('kmeans_cluster', { 
+        return await clusterLib.invoke('dbscan_cluster', { 
             embeddings: embeddings.flat(), 
             embeddings_cnt, 
             embeddings_dims,

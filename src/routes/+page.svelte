@@ -12,7 +12,7 @@
     const STORE_JSON_FILE = "store-" + MODEL.replace("/", "-") + ".json";
     const STORE_WEBSTORE_KEY = "blockstore-" + MODEL.replace("/", "-");
 
-    let loaded = false;         // does not track embedding adapter init callback
+    let loaded = false;
     let store : BlockStore;
     let tree : NavTree;
     let adapter : Worker;
